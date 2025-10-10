@@ -19,10 +19,10 @@ const routes: RouteRecordRaw[] = [{
   }, 
   
   {
-    path: 'channel/:id', 
+    path: '/channel/:id', 
     component: () => import('layouts/HomeLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/Chat.vue') },
+      { path: '', component: () => import('pages/ChannelChat.vue') },
       { path: 'settings', component: () => import('pages/ChannelSettings.vue') }
     ],
   },
