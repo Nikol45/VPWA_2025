@@ -5,22 +5,26 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import Login from 'src/components/auth/Login.vue';
+import { defineComponent, ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import Login from 'src/components/auth/Login.vue'
 
 export default defineComponent({
   name: 'AuthPage',
   components: { Login },
-  data() {
-    return {
-      showLogin: true,
+  setup () {
+    const showLogin = ref(true)
+    const router = useRouter()
+    const route = useRoute()
+
+    const handleLogin = async () => {
+      if (route.name !== 'home') {
+        await router.replace({ name: 'home' })
+      }
     }
-  },
-  methods: {
-    async handleLogin() {
-      await this.$router.push(`/home`)
-    },
-  },
+
+    return { showLogin, handleLogin }
+  }
 })
 </script>
 

@@ -36,3 +36,5 @@
 
 .op-60 { opacity: .6; }
 .op-95 { opacity: .95; }
+
+.message-input :deep(.q-field__control) { background-color: var(--l-4); }
