@@ -1,41 +1,38 @@
-/* Lilac dream theme */
-.l-1 {
-  background-color: #F1E1FF !important;
+:root {
+  /* Lilac dream theme */
+  --l-1: #F1E1FF; /* main background */
+  --l-2: #E2C1FF; /* chatting bubble bg */
+  --l-3: #5C4B6B; /* search-bar, cmd bg, private */
+  --l-4: #463855; /* cmd input, sidebar + top */
+  --l-5: #352A3D; /* user-info, selected, public  */
+
+  /* Midnight blue theme */
+  --b-1: #DEEEFF; /* main background */
+  --b-2: #BAD0EF; /* chatting bubble bg */
+  --b-3: #384E62; /* search-bar, cmd bg, private */
+  --b-4: #1E2F3F; /* cmd input, sidebar + top */
+  --b-5: #182633; /* user-info, selected, public  */
 }
 
-.l-2 {
-  background-color: #E2C1FF !important;
+/* Lilac */
+.l-1 {  background-color: var(--l-1) !important;}
+.l-2 {  background-color: var(--l-2) !important;}
+.l-3 {  background-color: var(--l-3) !important;}
+.l-4 {  background-color: var(--l-4) !important;}
+.l-5 {   background-color: var(--l-5) !important; }
+
+/* Midnight  */
+.b-1 {  background-color: var(--b-1) !important;}
+.b-2 {  background-color: var(--b-2) !important;}
+.b-3 {  background-color: var(--b-3) !important;}
+.b-4 {  background-color: var(--b-4) !important;}
+.b-5 {  background-color: var(--b-5) !important;}
+
+.q-chip { border-radius: 15px !important; }
+.q-field__control { border-radius: 15px !important; }
+.q-btn:not(.q-btn--round) {
+  border-radius: 15px !important;
 }
 
-.l-3 {
-  background-color: #5C4B6B !important;
-}
-
-.l-4 {
-  background-color: #4A3B5A !important;
-}
-
-.l-5 {
-  background-color: #352A3D !important;
-}
-
-/* Midnight blue theme */
-.b-1 {
-  background-color: #DEEEFF !important;
-}
-
-.b-2 {
-  background-color: #40576D !important;
-}
-
-.b-3 {
-  background-color: #223444 !important;
-}
-
-.b-4 {
-  background-color: #1E2F3F !important;
-}
-
-.b-5 {
-  background-color: #182633 !important;
-}
+.op-60 { opacity: .6; }
+.op-95 { opacity: .95; }
