@@ -1,2 +1,3 @@
-/quasar-project
+/quasar-project/node_modules
+/quasar-project/dist
 *.xml

@@ -12,7 +12,8 @@
           <div class="text-subtitle1">{{ activeChannel!.name }}</div>
         </div>
         <q-space />
-        <q-btn flat round dense icon="info" />
+        <q-btn flat round dense icon="info" :to="{ name: 'channel-settings' }" />
+
       </q-toolbar>
 
       <q-toolbar v-else />
@@ -41,7 +42,7 @@
 
             <q-space />
             <q-btn flat round dense icon="notifications_none" class="q-mr-sm" />
-            <q-btn flat round dense icon="settings" />
+            <q-btn flat round dense icon="settings" :to="{ name: 'profile-settings' }" />
           </q-toolbar>
         </div>
 
