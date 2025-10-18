@@ -1,38 +1,38 @@
-import type { RouteRecordRaw } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router'
 
-const routes: RouteRecordRaw[] = [{
+const routes: RouteRecordRaw[] = [
+  {
     path: '/',
     component: () => import('layouts/AuthLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/AuthPage.vue') },
-      { path: 'register', component: () => import('pages/RegisterPage.vue') }
-    ],
+      { name: 'login', path: '', component: () => import('pages/AuthPage.vue') },
+      { name: 'register', path: 'register', component: () => import('pages/RegisterPage.vue') }
+    ]
   },
 
   {
-    path: '/home/:id',
+    path: '/home',
     component: () => import('layouts/HomeLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/HomePage.vue') },
-      { path: 'settings', component: () => import('pages/ProfileSettings.vue') }
-    ],
-  }, 
-  
-  {
-    path: '/channel/:id', 
-    component: () => import('layouts/HomeLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/ChannelChat.vue') },
-      { path: 'settings', component: () => import('pages/ChannelSettings.vue') }
-    ],
+      { name: 'home', path: '', component: () => import('pages/HomePage.vue') },
+      { name: 'profile-settings', path: 'settings', component: () => import('pages/ProfileSettings.vue') }
+    ]
   },
 
-  // Always leave this as last one,
-  // but you can also remove it
+  {
+    path: '/channel/:id',
+    component: () => import('layouts/HomeLayout.vue'),
+    children: [
+      { name: 'channel', path: '', component: () => import('pages/ChannelChat.vue') },
+      { name: 'channel-settings', path: 'settings', component: () => import('pages/ChannelSettings.vue') }
+    ]
+  },
+
+  // fallback
   {
     path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue'),
-  },
-];
+    component: () => import('pages/ErrorNotFound.vue')
+  }
+]
 
-export default routes;
+export default routes
