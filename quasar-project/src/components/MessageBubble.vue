@@ -1,0 +1,81 @@
+<template>
+    <div v-if="!isMine" class="row items-end q-gutter-sm">
+        <q-avatar size="28px">
+            <img :src="user?.avatar ?? ''" alt="" />
+        </q-avatar>
+
+        <div>
+            <div class="text-caption op-60 q-ml-sm">
+                {{ user?.name }}
+            </div>
+            <div class="bubble their">
+                <div>{{ message.text }}</div>
+            </div>
+            <div class="text-caption op-60 q-mt-xs">
+                {{ message.time }}
+            </div>
+        </div>
+    </div>
+
+    <div v-else class="col row justify-end">
+        <div class="bubble mine">
+            <div>{{ message.text }}</div>
+        </div>
+        <div class="text-caption op-60 q-mt-xs text-right">{{ message.time }}</div>
+    </div>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+
+interface Message {
+    id: string
+    channelId: string
+    userId: string
+    text: string
+    time: string
+}
+
+interface User {
+    id: string
+    name: string
+    avatar: string
+}
+
+export default defineComponent({
+    name: 'MessageBubble',
+
+    props: {
+        message: {
+            type: Object as PropType<Message>,
+            required: true
+        },
+
+        user: {
+            type: Object as PropType<User | undefined>,
+            default: undefined
+        },
+
+        isMine: {
+            type: Boolean,
+            default: false
+        }
+    }
+})
+</script>
+
+<style scoped>
+    .bubble {
+        max-width: min(70vw, 560px);
+        padding: 8px 12px;
+        border-radius: 15px;
+        line-height: 1.3;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .bubble.their { background: #fff; color: #1f1f1f; }
+    .bubble.mine  { background: var(--l-2); color: #fff; margin-left: auto; }
+</style>

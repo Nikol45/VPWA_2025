@@ -28,13 +28,16 @@
 .b-4 {  background-color: var(--b-4) !important;}
 .b-5 {  background-color: var(--b-5) !important;}
 
-.q-chip { border-radius: 15px !important; }
+/*.q-chip { border-radius: 15px !important; }*/
 .q-field__control { border-radius: 15px !important; }
 .q-btn:not(.q-btn--round) {
+  border-radius: 15px !important;
+}
+.q-input {
   border-radius: 15px !important;
 }
 
 .op-60 { opacity: .6; }
 .op-95 { opacity: .95; }
 
-.message-input :deep(.q-field__control) { background-color: var(--l-4); }
+/*.message-input :deep(.q-field__control) { background-color: var(--l-4); }*/
