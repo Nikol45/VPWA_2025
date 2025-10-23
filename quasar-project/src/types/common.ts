@@ -1,0 +1,1 @@
+export type Visibility = 'all' | 'public' | 'private'
