@@ -9,12 +9,13 @@
         <div v-for="m in messages" :key="m.id" class="row">
           <message-bubble :message="m" :user="usersById[m.userId]" :is-mine="m.userId === meId"/>
         </div>
+
+        <div v-if="typingText" class="typing-bar text-caption l-1">
+          {{ typingText }}
+        </div>
       </div>
     </div>
 
-    <div v-if="typingText" class="typing-indicator text-caption op-60">
-      {{ typingText }}
-    </div>
   </q-page>
 </template>
 
@@ -51,6 +52,20 @@ export default defineComponent({
       } as Record<string, User>,
 
       messages: [
+        { id: 'm-13', channelId: 'ch-1', userId: 'u-nikol', text: 'BFFR', time: 'štvrtok 22:03' },
+        { id: 'm-12', channelId: 'ch-1', userId: 'u-simca', text: 'Ta pome spinkať 💤', time: 'štvrtok 22:04' },
+        { id: 'm-11', channelId: 'ch-1', userId: 'u-simca', text: 'Good nighty 🌃', time: 'štvrtok 22:04' },
+        { id: 'm-10', channelId: 'ch-1', userId: 'u-me', text: 'bruuu noc prajem ženy 💫💎', time: 'štvrtok 22:05' },
+        { id: 'm-09', channelId: 'ch-1', userId: 'u-simca', text: 'Môže byť?', time: 'piatok 09:31' },
+        { id: 'm-08', channelId: 'ch-1', userId: 'u-simca', text: 'poslala obrázok 🖼️', time: 'piatok 09:31' },
+        { id: 'm-07', channelId: 'ch-1', userId: 'u-simca', text: 'Nie je to too much?', time: 'piatok 09:32' },
+        { id: 'm-06', channelId: 'ch-1', userId: 'u-nikol', text: 'moze byyyt 😍', time: 'piatok 09:33' },
+        { id: 'm-05', channelId: 'ch-1', userId: 'u-simca', text: "It's out 😌", time: 'piatok 09:35' },
+        { id: 'm-04', channelId: 'ch-1', userId: 'u-nikol', text: 'aaa vyzerá to perfektne 🔥', time: 'piatok 09:36' },
+        { id: 'm-03', channelId: 'ch-1', userId: 'u-simca', text: 'yayy konečne hotovo 😮‍💨', time: 'piatok 09:36' },
+        { id: 'm-02', channelId: 'ch-1', userId: 'u-nikol', text: 'daj potom aj na story nech vidia 😎', time: 'piatok 09:37' },
+        { id: 'm-01', channelId: 'ch-1', userId: 'u-simca', text: 'maybeee 😏', time: 'piatok 09:38' },
+
         { id: 'm1', channelId: 'ch-1', userId: 'u-nikol', text: 'ngl hento sa mi paci farebne', time: 'piatok 14:53' },
         { id: 'm2', channelId: 'ch-1', userId: 'u-me',    text: 'tomu ver',                      time: '10:59' },
         { id: 'm3', channelId: 'ch-1', userId: 'u-nikol', text: 'idem si spravit nechty nejake pekne jesenne muhehehe', time: '10:59' },
@@ -105,13 +120,12 @@ export default defineComponent({
 
 <style scoped>
 
-.typing-indicator {
+.typing-bar {
     position: fixed;
-    bottom: 90px;
-    padding: 6px 12px;
-    color: #000;
-    background: transparent;
-    pointer-events: none;
+    bottom: 75px;
+    color: rgb(0, 0, 0, 0.7);
+    width: 100%;
+    cursor: pointer;
     text-align: left;
 }
 

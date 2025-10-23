@@ -5,23 +5,28 @@
         </q-avatar>
 
         <div>
-            <div class="text-caption op-60 q-ml-sm">
-                {{ user?.name }}
-            </div>
-            <div class="bubble their">
+            <div class="row items-center no-wrap">
+              <div class="text-caption op-60 q-ml-sm">
+                  {{ user?.name }}
+              </div>
+              <div class="text-caption op-60 q-ml-xs">
+                - {{ message.time }}
+              </div>
+          </div>
+
+
+          <div class="bubble their">
                 <div>{{ message.text }}</div>
             </div>
-            <div class="text-caption op-60 q-mt-xs">
-                {{ message.time }}
-            </div>
+
         </div>
     </div>
 
-    <div v-else class="col row justify-end">
-        <div class="bubble mine">
+    <div v-else class="col justify-end">
+      <div class="text-caption op-60 q-mr-xs text-right">{{ message.time }}</div>
+      <div class="bubble mine">
             <div>{{ message.text }}</div>
         </div>
-        <div class="text-caption op-60 q-mt-xs text-right">{{ message.time }}</div>
     </div>
 </template>
 
@@ -67,6 +72,7 @@ export default defineComponent({
 
 <style scoped>
     .bubble {
+        width: fit-content;
         max-width: min(70vw, 560px);
         padding: 8px 12px;
         border-radius: 15px;

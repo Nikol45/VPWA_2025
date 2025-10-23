@@ -1,6 +1,6 @@
 <template>
-    <div class="row items-center full-width">
-        <q-input dense standout="l-4" class="l-4 col q-ma-sm" placeholder="" v-model="msg" input-class="text-white" @keyup.enter="sendMessage">
+    <div class="row items-center full-width q-gutter-sm">
+        <q-input dense standout="l-4" class="l-4 col q-ma-xxs" placeholder="" v-model="msg" input-class="text-white" @keyup.enter="sendMessage">
             <template v-if="activeChannel" #prepend>
                 <q-btn flat round dense icon="emoji_emotions" aria-label="Emoji" />
             </template>
@@ -48,6 +48,6 @@
 
 <style scoped>
     .icon-sm {
-    width: 8px;
+      width: 0;
     }
 </style>
