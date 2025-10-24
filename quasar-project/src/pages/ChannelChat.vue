@@ -1,26 +1,30 @@
 <template>
-  <q-page class="l-1 q-pa-sm">
-    <div class="col">
-      <div class="column q-pa-md q-gutter-md">
-        <div class="row justify-center">
-          <q-btn dense outline rounded no-caps color="grey-5" class="bg-white text-grey-8 q-px-md" label="Load older messages" @click="loadOlder"/>
-        </div>
+  <q-page class="l-1 q-px-sm column">
+      <q-scroll-area ref="scrollArea"
+                     style="height: calc(100vh - 108px);"
+                     class="no-scrollbar q-px-md q-pb-md q-gutter-md">
 
-        <div v-for="m in messages" :key="m.id" class="row">
-          <message-bubble :message="m" :user="usersById[m.userId]" :is-mine="m.userId === meId"/>
-        </div>
+        <q-infinite-scroll reverse @load="onInfiniteLoad" >
+          <div v-for="m in messages" :key="m.id" class="row">
+            <message-bubble :message="m" :user="usersById[m.userId]" :is-mine="m.userId === meId"/>
+          </div>
 
-        <div v-if="typingText" class="typing-bar text-caption l-1">
-          {{ typingText }}
-        </div>
-      </div>
-    </div>
+          <div v-if="typingText" class="typing-bar text-caption l-1">
+            {{ typingText }}
+          </div>
 
+          <template #loading>
+            <div class="row justify-center q-my-md">
+              <q-spinner-dots size="24px" />
+            </div>
+          </template>
+        </q-infinite-scroll>
+      </q-scroll-area>
   </q-page>
 </template>
-
 <script lang="ts">
 import { defineComponent } from 'vue'
+import type { QScrollArea } from 'quasar'
 import MessageBubble from 'src/components/MessageBubble.vue'
 
 interface Message {
@@ -75,7 +79,8 @@ export default defineComponent({
         { id: 'm7', channelId: 'ch-1', userId: 'u-me',    text: '💅',                            time: '11:07' }
       ] as Message[],
 
-      typingUserIds: [] as string[]
+      typingUserIds: [] as string[],
+      loadTimer: null as number | null
     }
   },
 
@@ -92,9 +97,40 @@ export default defineComponent({
 
   mounted() {
     this.startTyping('u-nikol')
+    requestAnimationFrame(() => this.scrollToBottom())
   },
 
+
   methods: {
+    scrollToBottom() {
+      const scroll = this.$refs.scrollArea as QScrollArea | undefined
+      scroll?.setScrollPercentage('vertical', 10)
+    },
+
+    onInfiniteLoad(index: number, done: (stop?: boolean) => void) {
+      if (this.loadTimer) {
+        clearTimeout(this.loadTimer)
+        this.loadTimer = null
+      }
+      this.loadTimer = window.setTimeout(() => {
+        this.loadOlderBatch(5)
+        done() // done(true) ak už nič viac nemáš
+        this.loadTimer = null
+      }, 2000)
+    },
+
+    loadOlderBatch(count: number) {
+      const now = Date.now()
+      const older = Array.from({ length: count }, (_, i) => ({
+        id: `older-${now - i}`,
+        channelId: 'ch-1',
+        userId: 'u-simca',
+        text: `staršia správa #${i + 1}`,
+        time: 'štvrtok 16:20'
+      }))
+      this.messages.unshift(...older)
+    },
+
     startTyping(userId: string) {
       if (!this.typingUserIds.includes(userId)) {
         this.typingUserIds.push(userId)
@@ -121,8 +157,8 @@ export default defineComponent({
 <style scoped>
 
 .typing-bar {
-    position: fixed;
-    bottom: 75px;
+    position: sticky;
+    bottom: 0;
     color: rgb(0, 0, 0, 0.7);
     width: 100%;
     cursor: pointer;

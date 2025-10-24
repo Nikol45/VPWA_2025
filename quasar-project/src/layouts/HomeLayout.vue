@@ -9,26 +9,47 @@
         <div class="row items-center">
           <div class="text-subtitle1">{{ activeChannel!.name }}</div>
         </div>
-        <q-space/>
+        <q-space />
         <q-btn flat round dense icon="info" :to="{ name: 'channel-settings' }" />
       </q-toolbar>
 
-      <q-toolbar v-else/>
+      <q-toolbar v-else />
     </q-header>
 
-    <q-drawer v-model="leftOpen" side="left" :width="300" class="l-4 text-white sidebar relative-position">
+    <q-drawer
+      v-if="!isCompact || $route.name === 'home'"
+      v-model="leftOpen"
+      side="left"
+      behavior="desktop"
+      :width="isCompact ? $q.screen.width : 300"
+      :overlay="isCompact"
+      class="l-4 text-white sidebar relative-position"
+    >
       <div class="column fit">
-        <profile-block :user=user></profile-block>
+        <profile-block :user="user"></profile-block>
 
-        <search-filter v-model:filter="filter" v-model="search"></search-filter>
+        <search-filter v-model:filter="filter" v-model="search" class = "responsive-padding"></search-filter>
 
         <q-scroll-area class="col">
-          <q-list class="q-py-sm">
-            <channel-block v-for="c in filtered" :key="c.id" :channel="c" @click="goToChannel"></channel-block>
+          <q-list class="q-py-sm responsive-padding">
+            <channel-block
+              v-for="c in filtered"
+              :key="c.id"
+              :channel="c"
+              @click="goToChannel"
+            ></channel-block>
           </q-list>
         </q-scroll-area>
 
-        <q-btn v-if="route.name !== 'home'" round class="l-3 text-white op-95 floating-add" icon="add" size="22px" aria-label="Create channel" @click="createChannel"/>
+        <q-btn
+          v-if="$route.name !== 'home'"
+          round
+          class="l-3 text-white op-95 floating-add"
+          icon="add"
+          size="22px"
+          aria-label="Create channel"
+          @click="createChannel"
+        />
       </div>
     </q-drawer>
 
@@ -44,11 +65,22 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import CommandLine from 'src/components/CommandLine.vue'
 import ProfileBlock from 'src/components/sidebar/ProfileBlock.vue'
 import SearchFilter from 'src/components/sidebar/SearchFilter.vue'
 import ChannelBlock from 'src/components/sidebar/ChannelBlock.vue'
+
+import 'vue-router'
+import type { Router, RouteLocationNormalizedLoaded } from 'vue-router'
+import type { QVueGlobals } from 'quasar'
+
+declare module '@vue/runtime-core' {
+  interface ComponentCustomProperties {
+    $router: Router
+    $route: RouteLocationNormalizedLoaded
+    $q: QVueGlobals
+  }
+}
 
 type Visibility = 'all' | 'public' | 'private'
 
@@ -75,10 +107,7 @@ export default defineComponent({
         leftOpen: true,
         search: '',
         filter: 'all' as Visibility,
-        msg: '', 
-
-        router: useRouter(),
-        route: useRoute(),
+        msg: '',
 
         user: {
         nickname: 'FireFly x3',
@@ -103,6 +132,9 @@ export default defineComponent({
   },
 
   computed: {
+
+    isCompact(): boolean { return this.$q.screen.lt.sm },
+
     filtered(): Channel[] {
         const s = this.search.trim().toLowerCase()
         return this.channels.filter(c => this.filter === 'all' ||(this.filter === 'public' && !c.private) || (this.filter === 'private' && c.private)).filter(c => (s ? c.name.toLowerCase().includes(s) : true))
@@ -115,7 +147,22 @@ export default defineComponent({
     }
   },
 
+  watch: {
+    '$route.name'() { this.updateLeftOpen() },
+    isCompact() { this.updateLeftOpen() }
+  },
+
+  mounted() { this.updateLeftOpen() },
+
+
   methods: {
+    updateLeftOpen() {
+      if (this.isCompact) {
+        this.leftOpen = this.$route.name === 'home'
+      } else {
+        this.leftOpen = true
+      }
+    },
     goToChannel(c: Channel) {
       if (this.$route.params.id === c.id) return
       void this.$router.push({ name: 'channel', params: { id: c.id } })
@@ -135,14 +182,23 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.message-input :deep(.q-field__control) { background-color: var(--l-4); }
-.search-input  :deep(.q-field__control) { background-color: var(--l-3); }
-
-.outline-l5 { border: 1px solid var(--l-3) !important; }
+.message-input :deep(.q-field__control) {
+  background-color: var(--l-4);
+}
+.search-input :deep(.q-field__control) {
+  background-color: var(--l-3);
+}
 
 .floating-add {
   position: absolute;
   right: 40px;
   bottom: 30px;
+}
+
+@media (min-width: 350px) and (max-width: 590px) {
+  .responsive-padding {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
 }
 </style>

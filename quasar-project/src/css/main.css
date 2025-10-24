@@ -41,3 +41,7 @@
 .op-95 { opacity: .95; }
 
 /*.message-input :deep(.q-field__control) { background-color: var(--l-4); }*/
+
+.q-scrollarea__thumb--v {
+    display: none;
+}

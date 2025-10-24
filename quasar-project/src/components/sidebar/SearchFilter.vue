@@ -1,6 +1,6 @@
 <template>
     <div class="q-pa-md">
-        <q-input dense standout v-model="search" placeholder="Search channels..." class="no-padding search-input" input-class="text-white">
+        <q-input dense standout v-model="search" placeholder="Search channels..." class="no-padding search-input l-3" input-class="text-white">
         <template #prepend>
             <q-icon name="search" class="q-mr-sm" />
         </template>
