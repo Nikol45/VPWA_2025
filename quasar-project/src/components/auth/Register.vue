@@ -1,5 +1,5 @@
 <template>
-    <BaseForm v-model="localShow" title="Register" :fields="fields" :close-on-submit="closeOnSubmit" @submit="onSubmit" />
+    <BaseForm v-model="localShow" :cancel=false title="Register" :fields="fields" :close-on-submit="closeOnSubmit" @submit="onSubmit" />
 </template>
 
 <script lang="ts">

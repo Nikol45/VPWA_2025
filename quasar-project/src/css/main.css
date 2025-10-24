@@ -21,6 +21,12 @@
 .l-4 {  background-color: var(--l-4) !important;}
 .l-5 {   background-color: var(--l-5) !important; }
 
+.text-l-1 {  color: var(--l-1) !important;}
+.text-l-2 {  color: var(--l-2) !important;}
+.text-l-3 {  color: var(--l-3) !important;}
+.text-l-4 {  color: var(--l-4) !important;}
+.text-l-5 {   color: var(--l-5) !important; }
+
 /* Midnight  */
 .b-1 {  background-color: var(--b-1) !important;}
 .b-2 {  background-color: var(--b-2) !important;}
@@ -28,14 +34,19 @@
 .b-4 {  background-color: var(--b-4) !important;}
 .b-5 {  background-color: var(--b-5) !important;}
 
-/*.q-chip { border-radius: 15px !important; }*/
+.text-b-1 {  color: var(--l-1) !important;}
+.text-b-2 {  color: var(--l-2) !important;}
+.text-b-3 {  color: var(--l-3) !important;}
+.text-b-4 {  color: var(--l-4) !important;}
+.text-b-5 {   color: var(--l-5) !important; }
+
+.negative { background-color: #D06155;}
+
+.q-chip { border-radius: 15px; }
 .q-field__control { border-radius: 15px !important; }
-.q-btn:not(.q-btn--round) {
-  border-radius: 15px !important;
-}
-.q-input {
-  border-radius: 15px !important;
-}
+.q-btn:not(.q-btn--round) { border-radius: 15px !important;}
+.q-input { border-radius: 15px !important;}
+.q-card { border-radius: 15px !important;}
 
 .op-60 { opacity: .6; }
 .op-95 { opacity: .95; }
@@ -44,4 +55,8 @@
 
 .q-scrollarea__thumb--v {
     display: none;
+}
+
+.close-btn {
+  z-index: 10;
 }

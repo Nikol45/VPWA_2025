@@ -1,5 +1,5 @@
 <template>
-    <BaseForm v-model="localShow" title="Login" :fields="fields" note="Don't have an account?" :close-on-submit="closeOnSubmit" @submit="onSubmit" />
+    <BaseForm v-model="localShow" :cancel=false title="Login" :fields="fields" note="Don't have an account?" :close-on-submit="closeOnSubmit" @submit="onSubmit" />
 </template>
 
 <script lang="ts">

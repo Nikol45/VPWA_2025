@@ -1,15 +1,25 @@
 <template>
   <q-dialog v-model="localShow">
-    <q-card class="my_card q-pa-md shadow-2 l-2">
+    <q-card class="my_card q-pa-md shadow-2 l-2 relative-position">
+      <q-btn
+        v-if="cancel"
+        flat
+        round
+        dense
+        icon="close"
+        color="primary"
+        class="close-btn absolute-top-right q-mt-sm q-mr-sm"
+        @click="localShow = false"
+      />
       <q-card-section class="text-center">
-        <div class="text-grey-9 text-h5 text-weight-bold">{{ title }}</div>
+        <div class="text-l-5 text-h5 text-weight-bold">{{ title }}</div>
       </q-card-section>
       <q-card-section>
         <q-form ref="qForm" @submit.prevent="submitForm">
           <div v-for="field in fields" :key="field.model">
-            <q-input standout bg-color="accent" v-model="form[field.model]" :label="field.label" :type="field.type || 'text'" :rules="field.rules"></q-input>
+            <q-input standout bg-color="accent" class="always-primary q-mb-sm text-l-3" v-model="form[field.model]" :label="field.label" :type="field.type || 'text'" :rules="field.rules"></q-input>
           </div>
-          <q-btn style="border-radius: 8px;" type="Submit" rounded size="md" label="Submit" no-caps class="full-width l-5 text-purple-1 q-mt-md"></q-btn>
+          <q-btn style="border-radius: 8px;" type="submit" rounded size="md" label="Submit" no-caps class="full-width l-5 text-l-1 q-mt-md"></q-btn>
         </q-form>
       </q-card-section>
       <q-card-section class="text-center q-pt-none">
@@ -35,24 +45,34 @@ export default defineComponent({
   name: 'BaseForm',
 
   props: {
+    cancel: {
+      type: Boolean,
+      default: true,
+      required: true
+    },
+
     title: {
       type: String,
       default: '',
       required: true,
     },
+
     modelValue: {
       type: Boolean,
       required: true,
     },
+
     fields: {
       type: Array as () => Field[],
       default: () => [],
       required: true,
     },
+
     note: {
       type: String,
       default: '',
     },
+
     closeOnSubmit: {
       type: Boolean,
       default: true
@@ -111,5 +131,12 @@ export default defineComponent({
   width: 25rem;
   border-radius: 8px;
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+.always-primary :deep(.q-field__native),
+.always-primary :deep(.q-field__label),
+.always-primary :deep(.q-field__control),
+.always-primary :deep(.q-field__marginal) {
+  color: var(--q-primary) !important;
 }
 </style>

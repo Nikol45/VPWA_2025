@@ -41,7 +41,7 @@ export default defineComponent ({
         }
     },
 
-  emits: ['click']
+    emits: ['click']
 })
 
 </script>
