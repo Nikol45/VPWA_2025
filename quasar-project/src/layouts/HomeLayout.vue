@@ -26,7 +26,7 @@
       class="c-4 text-c-1 sidebar relative-position"
     >
       <div class="column fit">
-        <profile-block :user="user"></profile-block>
+        <profile-block :user="user" @action="handleProfileAction"></profile-block>
 
         <search-filter v-model:filter="filter" v-model="search" class = "responsive-padding"></search-filter>
 
@@ -87,6 +87,7 @@ interface User {
   nickname: string
   name: string
   avatarUrl: string
+  status: string
 }
 
 interface Channel {
@@ -111,7 +112,8 @@ export default defineComponent({
         user: {
         nickname: 'FireFly x3',
         name: 'Svetlana Pivarčiová',
-        avatarUrl: '/avatars/users/firefly.jpg'
+        avatarUrl: '/avatars/users/firefly.jpg',
+        status: 'online'
       } as User,
 
        channels: [
@@ -175,6 +177,13 @@ export default defineComponent({
 
     goHome() {
       void this.$router.push({ name: 'home' })
+    },
+
+    handleProfileAction(action: string) {
+      switch (action) {
+        case 'settings': void this.$router.push({ name: 'profile-settings' }); break
+        case 'notify': ; break
+      }
     }
   }
 })

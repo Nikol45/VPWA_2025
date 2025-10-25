@@ -1,7 +1,7 @@
 <template>
     <q-page class="q-pa-xl c-3">
         <div class="row q-col-gutter-xl">
-            <div class="coc-12 col-md-6">
+            <div class="col-12 col-md-6">
                 <q-card class="c-5 q-pa-md q-mb-lg">
                     <div class="row items-center q-gutter-md">
                         <q-avatar size="64px">
@@ -22,74 +22,56 @@
                 </div>
 
                 <div class="row justify-between q-mt-lg">
-                    <q-btn flat no-caps size="13px" class="col negative q-pa-sm q-mr-sm text-weight-bold text-c-1" @click="leaveChannel">Leave channel</q-btn> 
-                    <q-btn flat no-caps size="13px" class="col negative q-pa-sm q-ml-sm text-weight-bold text-c-1" @click="closeChannel">Close channel</q-btn> 
+                    <q-btn flat no-caps size="13px" class="col negative q-pa-sm q-mr-sm text-weight-bold text-c-1" @click="confirmLeave = true">Leave channel</q-btn> 
+                    <q-btn flat no-caps size="13px" class="col negative q-pa-sm q-ml-sm text-weight-bold text-c-1" @click="confirmClose = true">Close channel</q-btn> 
                 </div>
             </div>
 
-            <div class="coc-12 col-md-6">
+            <div class=" col-12 col-md-6">
                 <div class="row items-center justify-between q-mb-md">
                     <p class="text-h6 text-weight-bold q-mb-xs text-c-1">Members</p>
                     <div>
-                        <q-btn flat no-caps icon="add" size="13px" class="col c-5 q-pa-sm text-weight-bold text-c-1" @click="inviteMember">Invite</q-btn> 
-                        <q-btn flat no-caps size="13px" class="col c-5 q-pa-sm text-weight-bold text-c-1" @click="showMembers">Show all</q-btn> 
+                        <q-btn flat no-caps icon="add" size="13px" class="col c-5 q-pa-sm q-mr-xs text-weight-bold text-c-1" @click="inviteMember">Invite</q-btn> 
+                        <q-btn v-if="members.length > 3" flat no-caps size="13px" class="col c-5 q-pa-sm text-weight-bold q-ml-xs text-c-1" @click="showMembers">Show all</q-btn> 
                     </div>
                 </div>
 
-                <q-card
-                    v-for="member in members"
-                    :key="member.id"
-                    class="c-5 q-pa-sm q-mb-sm row items-center justify-between"
-                >
-                    <div class="row items-center q-gutter-sm">
-                        <q-avatar size="40px">
-                            <img :src="member.avatar" alt="member avatar" />
-                        </q-avatar>
-                        <div>
-                            <div class="text-subtitle1">{{ member.nickname }}</div>
-                            <div class="text-caption">{{ member.name }}</div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <q-chip
-                            v-if="member.role === 'admin'"
-                            color="c-4"
-                            text-color="white"
-                            dense
-                            label="Admin"
-                        />
-                        <q-btn
-                            v-else
-                            round
-                            dense
-                            flat
-                            icon="remove_circle_outline"
-                            color="c-2"
-                            class="q-ml-sm"
-                        />
-                    </div>
-                </q-card>
+                <div v-for="member in members.slice(0, 3)" :key="member.id" class="member-item c-5 q-pa-sm q-mb-md row justify-between items-center">
+                    <profile-block class="fit" :user="member" :buttons="[ { icon: 'remove_circle_outline', action: 'remove' }]"></profile-block>
+                </div>
+                <p class="text-caption text-c-1 text-weight-bold">And {{ channel.members - 3 }} others...</p>
             </div>
         </div>
+        <confirm-popup v-model="confirmLeave" message="Are you sure you want to leave this channel?" confirm-label="Leave" @confirm="leaveChannel"></confirm-popup>
+        <confirm-popup v-model="confirmClose" message="Are you sure you want to close this channel?" confirm-label="Close channel" @confirm="closeChannel"></confirm-popup>
+    <members-popup v-model="showMembersPopup" :members="members"></members-popup>
     </q-page>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import type { Member } from 'src/types/common.ts'
+import MembersPopup from 'src/components/popups/MembersPopup.vue'
 import FormField from 'src/components/FormField.vue'
+import ConfirmPopup from 'src/components/popups/ConfirmPopup.vue'
+import ProfileBlock from 'src/components/sidebar/ProfileBlock.vue'
 
 export default defineComponent({
     name: 'ChannelSettings',
-    components: { FormField },
+    components: { FormField, ConfirmPopup, ProfileBlock, MembersPopup },
 
 
     data() {
         return {
+            confirmLeave: false,
+            confirmClose: false,
+            showMembersPopup: false,
+
             channel: {
                 name: 'Ženy na FIIT',
                 avatar: '/avatars/channels/zeny.png',
-                visibility: 'Public'
+                visibility: 'Public',
+                members: 5
             },
 
             visibilityOptions: ['Public', 'Private'],
@@ -99,22 +81,39 @@ export default defineComponent({
                     id: 1,
                     nickname: 'FireFly x3',
                     name: 'Svetlana Pivarčiová',
-                    avatar: '/avatars/users/firefly.jpg',
-                    role: 'admin'
+                    avatarUrl: '/avatars/users/firefly.jpg',
+                    role: 'admin',
+                    status: 'online'
                 },
                 {
                     id: 2,
-                    nickname: 'Nikol 🐱',
+                    nickname: 'Nikol',
                     name: 'Nikol Maljarová',
-                    avatar: '/avatars/users/nikol.jpg'
+                    avatarUrl: '/avatars/users/nikol.png',
+                    status: 'online'
                 },
                 {
                     id: 3,
-                    nickname: 'Simča ✨',
-                    name: 'Simona Rišovská',
-                    avatar: '/avatars/users/simca.jpg'
+                    nickname: 'Simča',
+                    name: 'Simona Ričovská',
+                    avatarUrl: '/avatars/users/simca.png',
+                    status: 'offline'
+                },
+                {
+                    id: 4,
+                    nickname: 'Peťo',
+                    name: 'Peter Ďurčo',
+                    avatarUrl: '/avatars/users/peto.png',
+                    status: 'dnd'
+                },
+                {
+                    id: 5,
+                    nickname: 'Betka',
+                    name: 'Betka Zat',
+                    avatarUrl: '/avatars/users/betka.png',
+                    status: 'dnd'
                 }
-            ]
+            ] as Member[]
         }
     },
 
@@ -138,19 +137,19 @@ export default defineComponent({
       }
         },
 
-        leaveChannel() {
+        showMembers() {
+            this.showMembersPopup = true
+        },
 
+        leaveChannel() {
+            void this.$router.push({ name: 'home' })
         },
 
         closeChannel() {
-
+            void this.$router.push({ name: 'home' })
         },
 
         inviteMember() {
-
-        },
-
-        showMembers() {
 
         }
     }
@@ -162,7 +161,19 @@ export default defineComponent({
 .always-primary :deep(.q-field__label),
 .always-primary :deep(.q-field__control),
 .always-primary :deep(.q-field__marginal) {
-  color: var(--q-primary) !important;
+  color: var(--c-3) !important;
+  background-color: var(--c-1) !important;
+}
+
+:deep(.q-field--standout .q-field__control:before),
+:deep(.q-field--standout .q-field__control:after) {
+  background: none !important;
+  opacity: 0 !important;
+}
+
+.member-item {
+    border-radius: 15px;
+    width: 100%;
 }
 
 

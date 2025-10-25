@@ -1,18 +1,26 @@
 <template>
     <div v-if="user" class="c-5 text-c-1">
-        <q-toolbar class="q-px-md" style="min-height:72px">
-        <q-avatar size="45px" class="q-mr-md">
-            <img :src="user.avatarUrl" alt="avatar" />
-        </q-avatar>
+        <q-toolbar class="q-px-md justify-between" style="min-height:72px">
+            <div class="row items-center no-wrap">
+                <div class="relative-position">
+                    <q-avatar size="45px" class="q-mr-md">
+                        <img :src="user.avatarUrl"/>
+                    </q-avatar>
+                    <q-icon name="circle" bordered size="11px" :color="statusColor" class="thick-outline absolute-bottom-right"/>
+                </div>
 
-        <div class="column">
-            <div class="text-h6">{{user.nickname}}</div>
-            <div class="text-caption">{{user.name}}</div>
-        </div>
+                <div class="column col-grow set-width">
+                    <p class="text-h6 q-ma-none ellipsis">{{user.nickname}}</p>
+                    <p class="text-caption q-ma-none ellipsis">{{user.name}}</p>
+                </div>
+            </div>
 
-        <q-space/>
-        <q-btn flat round dense icon="notifications_none" class="q-mr-sm" />
-        <q-btn flat round dense icon="settings" :to="{ name: 'profile-settings' }" />
+            <div class="row items-center q-gutter-sm no-wrap">
+                <q-chip v-if="user.role" dense size="md" class="q-ml-xs q-pa-sm text-c-1 c-3">Admin</q-chip>
+                <template v-else>
+                    <q-btn v-for="(btn, index) in buttons" :key="index" flat round dense :icon="btn.icon" :color="'c-1'" @click="handleAction(btn.action)"/>
+                </template>
+            </div>
         </q-toolbar>
     </div>
 </template>
@@ -29,10 +37,62 @@
                 required: false,
                 default: () => ({
                     nickname: 'Guest',
-                    name: 'Anonymous User',
-                    avatarUrl: '/avatars/default.png'
+                    name: 'Anonymous user',
+                    avatarUrl: '/avatars/default.png',
+                    status: 'online'
                 })
+            },
+
+            buttons: {
+                type: Array as () => {
+                    icon: string
+                    action?: string
+                }[],
+
+                default: () => [
+                    { icon: 'notifications_none', action: 'notify' },
+                    { icon: 'settings', action: 'settings' }
+                ]
+            }
+        },
+
+        emits: ['action'],
+
+        methods: {
+            handleAction(action?: string) {
+                if (action) this.$emit('action', action)
+            }
+        },
+
+        computed: {
+            statusColor(): string {
+                switch (this.user.status) {
+                    case 'online': return 'positive'
+                    case 'dnd': return 'negative'
+                    case 'offline': return 'grey'
+                    default: return 'grey'
+                }
             }
         }
     })
 </script>
+
+<style scoped>
+    .q-chip {
+        font-size: 11px;
+        border-radius: 15px;
+    }
+
+    .thick-outline {
+        margin-right: 16%;
+        border-width: 8px;
+        border-radius: 50%;
+        border-style: solid;
+        border-color: var(--c-5);
+        box-sizing: border-box;
+    }
+
+    .set-width {
+        min-width: 0;
+    }
+</style>

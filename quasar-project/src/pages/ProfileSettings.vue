@@ -2,14 +2,14 @@
   <q-page class="q-px-xl q-pt-xl q-pb-sm c-3 text-c-1">
     <div class="row q-col-gutter-xl">
 
-      <div class="coc-12 col-md-4">
+      <div class="col-12 col-md-4">
         <q-card class="c-5 q-pa-md">
           <div class="row items-center q-gutter-md">
             <div class="relative-position">
               <q-avatar size="64px">
                 <img :src="user.avatar"/>
               </q-avatar>
-              <q-icon name="circle" bordered size="17px" :color="statusColor" class="thick-outline absolute-bottom-right q-mb-xs"/>
+              <q-icon name="circle" bordered size="17px" :color="statusColor" class="thick-outline absolute-bottom-right"/>
             </div>
             <div class="text-container">
               <p class="ellipsis text-h6 q-mb-none text-c-1">{{ user.nickname }}</p>
@@ -31,17 +31,17 @@
         </div>
 
         <div class="q-mt-md">
-          <q-btn size="13px" label="Log out" no-caps color="negative" unelevated class="text-weight-bold text-c-1 q-py-sm q-px-lg" @click="confirm = true"/>
+          <q-btn size="13px" label="Log out" no-caps flat class="negative text-weight-bold text-c-1 q-py-sm q-px-lg" @click="confirmLogout = true"/>
         </div>
       </div>
 
-      <div class="coc-12 col-md-8">
+      <div class="col-12 col-md-8">
         <div class="q-mb-lg">
           <p class="text-h5 text-weight-bold text-c-1">App appearance</p>
           <p class="text-h6 text-weight-bold text-c-1 q-mt-lg">Choose app theme:</p>
 
           <div class="theme-row row q-col-gutter-md q-mt-md c-3 justify-between">
-            <q-card flat v-for="theme in themes" :key="theme.id" :class="['coc-5', selectedTheme === theme.id ? 'picked' : '']" class="c-5 cursor-pointer q-pa-md flex flex-center column" @click="selectTheme(theme.id)">
+            <q-card flat v-for="theme in themes" :key="theme.id" :class="['col-5', selectedTheme === theme.id ? 'picked' : '']" class="c-5 cursor-pointer q-pa-md flex flex-center column" @click="selectTheme(theme.id)">
               <q-avatar size="60px">
                 <img :src="theme.preview"/>
               </q-avatar>
@@ -64,18 +64,7 @@
       </div>
     </div>
     <base-form v-model="showChangePassword" :cancel=true title="Change password" :fields="passwordFields" @submit="handlePasswordChange"/>
-    <q-dialog v-model="confirm" persistent>
-      <q-card class="c-2 text-c-3 text-weight-bold q-pa-md">
-        <q-card-section class="row items-center">
-          <span class="logout-warning">Are you sure you want to log out?</span>
-        </q-card-section>
-
-        <q-card-actions align="center">
-          <q-btn flat label="Cancel" no-caps class="c-5 text-c-1 q-mr-lg" v-close-popup/>
-          <q-btn flat label="Log out" no-caps class="text-c-1 negative" @click="goAuth"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <confirm-popup v-model="confirmLogout" message="Are you sure you want to log out?" confirm-label="Log out" @confirm="goAuth"></confirm-popup>
   </q-page>
 </template>
 
@@ -83,14 +72,15 @@
 import { defineComponent } from 'vue'
 import FormField from 'src/components/FormField.vue'
 import BaseForm from 'src/components/auth/BaseForm.vue'
+import ConfirmPopup from 'src/components/popups/ConfirmPopup.vue'
 
 export default defineComponent({
   name: 'ProfileSettings',
-  components: { FormField, BaseForm },
+  components: { FormField, BaseForm, ConfirmPopup },
 
   data() {
     return {
-      confirm: false,
+      confirmLogout: false,
       showChangePassword: false,
 
       user: {
@@ -108,7 +98,7 @@ export default defineComponent({
         { label: 'Retype new password', model: 'rePassword', type: 'password' as const, rules: [(val: string) => !!val || 'Retyped password is required'] },
       ],
 
-      selectedTheme: 'lilac',
+      selectedTheme: 'L',
       status: 'online',
       notifications: 'all',
 
@@ -178,6 +168,10 @@ export default defineComponent({
   },
 
   watch: {
+    status(newStatus) {
+      localStorage.setItem('userStatus', newStatus)
+    },
+
     'user.firstName': function () {
       this.user.name = `${this.user.firstName} ${this.user.lastName}`.trim()
     },
@@ -193,6 +187,9 @@ export default defineComponent({
       this.selectedTheme = saved
       document.documentElement.setAttribute('theme', saved)
     }
+
+    const savedStatus = localStorage.getItem('userStatus')
+    this.status = savedStatus || 'online'
   }
 
 })
@@ -211,10 +208,6 @@ export default defineComponent({
   .text-container {
     flex: 1;
     min-width: 0;
-  }
-
-  .logout-warning {
-    font-size: 20px;
   }
 
   .q-card__actions .q-btn--rectangle {

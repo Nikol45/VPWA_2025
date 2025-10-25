@@ -12,7 +12,7 @@
     </q-header>
     <q-drawer v-if="!isCompact || $route.name === 'home'" v-model="leftOpen" side="left" behavior="desktop" :width="isCompact ? $q.screen.width : 300" :overlay="isCompact" class="c-4 text-c-1 sidebar relative-position">
       <div class="column fit">
-        <profile-block :user="user"></profile-block>
+        <profile-block :user="user" @action="handleProfileAction"></profile-block>
         <search-filter v-model:filter="filter" v-model="search" class="responsive-padding"></search-filter>
         <q-scroll-area class="col">
           <q-list class="q-py-sm responsive-padding">
@@ -45,6 +45,7 @@
         nickname: string
         name: string
         avatarUrl: string
+        status: string
     }
 
     interface Channel {
@@ -68,7 +69,8 @@
             user: {
                 nickname: 'FireFly x3',
                 name: 'Svetlana Pivarčiová',
-                avatarUrl: '/avatars/users/firefly.jpg'
+                avatarUrl: '/avatars/users/firefly.jpg',
+                status: 'online'
             } as User,
 
             channels: [
@@ -107,11 +109,18 @@
 
       createChannel() {
       },
+
+      handleProfileAction(action: string) {
+        switch (action) {
+          case 'settings': void this.$router.push({ name: 'profile-settings' }); break
+          case 'notify': ; break
+        }
+      }
     },
 
     computed: {
 
-        isCompact(): boolean { return this.$q.screen.lt.sm },
+        isCompact(): boolean { return this.$q.screen.width < 660 },
 
         filtered(): Channel[] {
             const s = this.search.trim().toLowerCase()

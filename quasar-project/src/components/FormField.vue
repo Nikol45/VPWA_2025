@@ -46,11 +46,18 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.always-primary :deep(.q-field__native),
-.always-primary :deep(.q-field__label),
-.always-primary :deep(.q-field__control),
-.always-primary :deep(.q-field__marginal) {
-  color: var(--q-primary) !important;
-}
+  .always-primary :deep(.q-field__native),
+  .always-primary :deep(.q-field__label),
+  .always-primary :deep(.q-field__control),
+  .always-primary :deep(.q-field__marginal) {
+    color: var(--c-3) !important;
+    background-color: var(--c-1) !important;
+  }
+
+  :deep(.q-field--standout .q-field__control:before),
+  :deep(.q-field--standout .q-field__control:after) {
+    background: none !important;
+    opacity: 0 !important;
+  }
 
 </style>
