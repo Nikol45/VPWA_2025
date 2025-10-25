@@ -47,6 +47,7 @@
 .q-btn:not(.q-btn--round) { border-radius: 15px !important;}
 .q-input { border-radius: 15px !important;}
 .q-card { border-radius: 15px !important;}
+.q-select { border-radius: 15px; }
 
 .op-60 { opacity: .6; }
 .op-95 { opacity: .95; }

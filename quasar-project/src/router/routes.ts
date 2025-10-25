@@ -30,7 +30,14 @@ const routes: RouteRecordRaw[] = [
     path: '/channel/:id',
     component: () => import('layouts/HomeLayout.vue'),
     children: [
-      { name: 'channel', path: '', component: () => import('pages/ChannelChat.vue') },
+      { name: 'channel', path: '', component: () => import('pages/ChannelChat.vue') }
+    ]
+  },
+
+  {
+    path: '/channel/:id',
+    component: () => import('layouts/ChannelSettingsLayout.vue'),
+    children: [
       { name: 'channel-settings', path: 'settings', component: () => import('pages/ChannelSettings.vue') }
     ]
   },

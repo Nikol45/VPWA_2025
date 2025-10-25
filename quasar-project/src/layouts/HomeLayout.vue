@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header class="l-3 text-white">
+    <q-header class="l-3 text-l-1">
       <q-toolbar v-if="activeChannel">
         <q-btn flat round dense icon="arrow_back" class="q-mr-sm" @click="goHome" />
         <q-avatar size="28px" class="q-mr-sm">
@@ -23,7 +23,7 @@
       behavior="desktop"
       :width="isCompact ? $q.screen.width : 300"
       :overlay="isCompact"
-      class="l-4 text-white sidebar relative-position"
+      class="l-4 text-l-1 sidebar relative-position"
     >
       <div class="column fit">
         <profile-block :user="user"></profile-block>
@@ -44,10 +44,9 @@
         <q-btn
           v-if="$route.name !== 'home'"
           round
-          class="l-3 text-white op-95 floating-add"
+          class="l-3 text-l-1 op-95 floating-add"
           icon="add"
           size="22px"
-          aria-label="Create channel"
           @click="createChannel"
         />
       </div>
@@ -57,7 +56,7 @@
       <router-view />
     </q-page-container>
 
-    <q-footer class="l-3 text-white q-pa-md">
+    <q-footer class="l-3 text-l-1 q-pa-md">
       <command-line :active-channel="activeChannel"></command-line>
     </q-footer>
   </q-layout>

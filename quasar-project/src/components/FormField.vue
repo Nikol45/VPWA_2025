@@ -1,8 +1,8 @@
 <template>
   <div class="q-mb-md">
-    <div v-if="title" class="text-h6 text-weight-bold q-mb-xs text-l-1">
+    <p v-if="title" class="text-h6 text-weight-bold q-mb-xs text-l-1">
       {{ title }}
-    </div>
+    </p>
 
     <div class="row items-center q-gutter-sm">
       <q-input v-model="model" dense standout="l-2" class="l-2 col always-primary q-mr-sm"/>

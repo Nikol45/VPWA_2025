@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header class="l-4 text-white">
+    <q-header class="l-4 text-l-1">
       <q-toolbar>
         <q-btn flat round dense icon="arrow_back" class="q-mr-sm" @click="goHome" />
         <div class="row items-center">
@@ -13,7 +13,7 @@
     <q-page-container class="l-1">
       <router-view />
     </q-page-container>
-    <q-footer class="l-3 text-white q-pa-md">
+    <q-footer class="l-3 text-l-1 q-pa-md">
       <CommandLine class="q-px-lg"></CommandLine>
     </q-footer>
   </q-layout>
