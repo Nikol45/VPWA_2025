@@ -2,7 +2,7 @@
   <q-layout view="lHh Lpr lFf">
     <q-header class="c-4 text-c-1">
       <q-toolbar>
-        <q-btn flat round dense icon="arrow_back" class="q-mr-sm" @click="goHome" />
+        <q-btn flat round dense icon="arrow_back" class="q-mr-sm" @click="goBackToChannel" />
         <div class="row items-center">
           <p class="text-h5 text-weight-bolder text-c-1 q-mb-none">Channel settings</p>
         </div>
@@ -20,7 +20,9 @@
           </q-list>
         </q-scroll-area>
 
-        <q-btn v-if="$route.name !== 'home'" round class="c-3 text-c-1 op-95 floating-add" icon="add" size="22px" @click="createChannel"/>
+        <q-btn v-if="$route.name !== 'home'"
+               round class="c-3 text-c-1 op-95 floating-add"
+               icon="add" size="22px" @click="createChannel"/>
       </div>
     </q-drawer>
     <q-page-container class="c-1">
@@ -38,7 +40,7 @@
     import ProfileBlock from 'src/components/sidebar/ProfileBlock.vue'
     import SearchFilter from 'src/components/sidebar/SearchFilter.vue'
     import ChannelBlock from 'src/components/sidebar/ChannelBlock.vue'
-        
+
     type Visibility = 'all' | 'public' | 'private'
 
     interface User {
@@ -90,8 +92,13 @@
     },
 
     methods: {
-      goHome() {
-        void this.$router.push({ name: 'home' })
+      goBackToChannel() {
+        const id = this.$route.params.id
+        if (id) {
+          void this.$router.push({ name: 'channel', params: { id } })
+        } else {
+          void this.$router.back()
+        }
       },
 
       updateLeftOpen() {

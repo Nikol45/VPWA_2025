@@ -10,7 +10,7 @@
               <div class="text-caption op-60 q-ml-xs"> - {{ message.time }}</div>
           </div>
 
-          <div class="bubble their">
+          <div class="bubble rad-15 their">
             <div>{{ message.text }}</div>
           </div>
         </div>
@@ -18,7 +18,7 @@
 
     <div v-else class="col justify-end">
       <div class="text-caption op-60 q-mr-xs text-right">{{ message.time }}</div>
-      <div class="bubble mine">
+      <div class="bubble rad-15 mine">
             <div>{{ message.text }}</div>
         </div>
     </div>
@@ -69,7 +69,6 @@ export default defineComponent({
         width: fit-content;
         max-width: min(35vw, 560px);
         padding: 8px 12px;
-        border-radius: 15px;
         line-height: 1.3;
         box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         white-space: pre-wrap;
