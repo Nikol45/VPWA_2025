@@ -1,9 +1,9 @@
 <template>
-  <q-page class="q-px-xl q-pt-xl q-pb-sm l-3 text-l-1">
+  <q-page class="q-px-xl q-pt-xl q-pb-sm c-3 text-c-1">
     <div class="row q-col-gutter-xl">
 
-      <div class="col-12 col-md-4">
-        <q-card class="l-5 q-pa-md">
+      <div class="coc-12 col-md-4">
+        <q-card class="c-5 q-pa-md">
           <div class="row items-center q-gutter-md">
             <div class="relative-position">
               <q-avatar size="64px">
@@ -12,8 +12,8 @@
               <q-icon name="circle" bordered size="17px" :color="statusColor" class="thick-outline absolute-bottom-right q-mb-xs"/>
             </div>
             <div class="text-container">
-              <p class="ellipsis text-h6 q-mb-none text-l-1">{{ user.nickname }}</p>
-              <p class="ellipsis text-caption text-weight-light q-mb-none text-l-1">{{ user.name }}</p>
+              <p class="ellipsis text-h6 q-mb-none text-c-1">{{ user.nickname }}</p>
+              <p class="ellipsis text-caption text-weight-light q-mb-none text-c-1">{{ user.name }}</p>
             </div>
           </div>
         </q-card>
@@ -26,53 +26,53 @@
         </div>
 
         <div class="row q-gutter-lg q-mt-md">
-          <q-btn flat no-caps size="13px" class="col l-5 q-pa-sm text-weight-bold text-l-1" @click="changePfp">Change icon</q-btn>
-          <q-btn flat no-caps size="13px" class="col l-5 q-pa-sm text-weight-bold text-l-1" @click="showChangePassword = true">Change password</q-btn>
+          <q-btn flat no-caps size="13px" class="col c-5 q-pa-sm text-weight-bold text-c-1" @click="changePfp">Change icon</q-btn>
+          <q-btn flat no-caps size="13px" class="col c-5 q-pa-sm text-weight-bold text-c-1" @click="showChangePassword = true">Change password</q-btn>
         </div>
 
         <div class="q-mt-md">
-          <q-btn size="13px" label="Log out" no-caps color="negative" unelevated class="text-weight-bold text-l-1 q-py-sm q-px-lg" @click="confirm = true"/>
+          <q-btn size="13px" label="Log out" no-caps color="negative" unelevated class="text-weight-bold text-c-1 q-py-sm q-px-lg" @click="confirm = true"/>
         </div>
       </div>
 
-      <div class="col-12 col-md-8">
+      <div class="coc-12 col-md-8">
         <div class="q-mb-lg">
-          <p class="text-h5 text-weight-bold text-l-1">App appearance</p>
-          <p class="text-h6 text-weight-bold text-l-1 q-mt-lg">Choose app theme:</p>
+          <p class="text-h5 text-weight-bold text-c-1">App appearance</p>
+          <p class="text-h6 text-weight-bold text-c-1 q-mt-lg">Choose app theme:</p>
 
-          <div class="theme-row row q-col-gutter-md q-mt-md l-3 justify-between">
-            <q-card flat v-for="theme in themes" :key="theme.id" :class="['col-5', selectedTheme === theme.id ? 'picked' : '']" class="l-5 cursor-pointer q-pa-md flex flex-center column" @click="selectTheme(theme.id)">
+          <div class="theme-row row q-col-gutter-md q-mt-md c-3 justify-between">
+            <q-card flat v-for="theme in themes" :key="theme.id" :class="['coc-5', selectedTheme === theme.id ? 'picked' : '']" class="c-5 cursor-pointer q-pa-md flex flex-center column" @click="selectTheme(theme.id)">
               <q-avatar size="60px">
                 <img :src="theme.preview"/>
               </q-avatar>
-              <p class="q-mt-sm text-subtitle2 text-l-1 q-ma-none">{{ theme.name }}</p>
+              <p class="q-mt-sm text-subtitle2 text-c-1 q-ma-none">{{ theme.name }}</p>
             </q-card>
           </div>
         </div>
 
         <div class="row q-col-gutter-lg">
           <div class="col-6">
-            <p class="text-h6 text-l-1 text-weight-bold">Status</p>
-            <q-option-group v-model="status" :options="statusOptions" color="l-1" type="radio"/>
+            <p class="text-h6 text-c-1 text-weight-bold">Status</p>
+            <q-option-group v-model="status" :options="statusOptions" color="c-1" type="radio"/>
           </div>
 
           <div class="col-6">
-            <p class="text-h6 text-l-1 text-weight-bold">Notifications</p>
-            <q-option-group v-model="notifications" :options="notificationOptions" color="l-1" type="radio"/>
+            <p class="text-h6 text-c-1 text-weight-bold">Notifications</p>
+            <q-option-group v-model="notifications" :options="notificationOptions" color="c-1" type="radio"/>
           </div>
         </div>
       </div>
     </div>
     <base-form v-model="showChangePassword" :cancel=true title="Change password" :fields="passwordFields" @submit="handlePasswordChange"/>
     <q-dialog v-model="confirm" persistent>
-      <q-card class="l-2 text-l-3 text-weight-bold q-pa-md">
+      <q-card class="c-2 text-c-3 text-weight-bold q-pa-md">
         <q-card-section class="row items-center">
           <span class="logout-warning">Are you sure you want to log out?</span>
         </q-card-section>
 
         <q-card-actions align="center">
-          <q-btn flat label="Cancel" no-caps class="l-5 text-l-1 q-mr-lg" v-close-popup/>
-          <q-btn flat label="Log out" no-caps class="text-l-1 negative" @click="goAuth"/>
+          <q-btn flat label="Cancel" no-caps class="c-5 text-c-1 q-mr-lg" v-close-popup/>
+          <q-btn flat label="Log out" no-caps class="text-c-1 negative" @click="goAuth"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -113,8 +113,8 @@ export default defineComponent({
       notifications: 'all',
 
       themes: [
-        { id: 'lilac', name: 'Lilac dream', preview: '/themes/gradient_lilac.png' },
-        { id: 'midnight', name: 'Midnight blue', preview: '/themes/gradient_blue.png' }
+        { id: 'L', name: 'Lilac dream', preview: '/themes/gradient_lilac.png' },
+        { id: 'B', name: 'Midnight blue', preview: '/themes/gradient_blue.png' }
       ],
 
       statusOptions: [
@@ -134,6 +134,8 @@ export default defineComponent({
   methods: {
     selectTheme(themeId: string) {
       this.selectedTheme = themeId
+      document.documentElement.setAttribute('theme', themeId)
+      localStorage.setItem('theme', themeId)
     },
 
     changePfp() {
@@ -183,6 +185,14 @@ export default defineComponent({
     'user.lastName': function () {
       this.user.name = `${this.user.firstName} ${this.user.lastName}`.trim()
     }
+  },
+
+  created() {
+    const saved = localStorage.getItem('theme')
+    if (saved) {
+      this.selectedTheme = saved
+      document.documentElement.setAttribute('theme', saved)
+    }
   }
 
 })
@@ -194,7 +204,7 @@ export default defineComponent({
     border-width: 11px;
     border-radius: 50%;
     border-style: solid;
-    border-color: var(--l-5);
+    border-color: var(--c-5);
     box-sizing: border-box;
   }
 

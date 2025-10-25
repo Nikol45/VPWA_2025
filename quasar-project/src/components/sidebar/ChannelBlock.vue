@@ -12,7 +12,7 @@
         </q-item-section>
 
         <q-item-section side>
-            <q-chip dense class="text-l-1 q-pa-sm text-caption" :class="channel.private ? 'l-3' : 'l-5'">
+            <q-chip dense class="text-c-1 q-pa-sm text-caption" :class="channel.private ? 'c-3' : 'c-5'">
                 {{ channel.private ? 'Private' : 'Public' }}
             </q-chip>
         </q-item-section>

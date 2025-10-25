@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center fit l-3">
+  <q-page class="flex flex-center fit c-3">
     <Login v-model="showLogin" @submit="handleLogin" :close-on-submit="true" />
   </q-page>
 </template>

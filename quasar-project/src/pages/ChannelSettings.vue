@@ -1,45 +1,45 @@
 <template>
-    <q-page class="q-pa-xl l-3">
+    <q-page class="q-pa-xl c-3">
         <div class="row q-col-gutter-xl">
-            <div class="col-12 col-md-6">
-                <q-card class="l-5 q-pa-md q-mb-lg">
+            <div class="coc-12 col-md-6">
+                <q-card class="c-5 q-pa-md q-mb-lg">
                     <div class="row items-center q-gutter-md">
                         <q-avatar size="64px">
                             <img :src="channel.avatar"/>
                         </q-avatar>
                         <div class="col">
-                            <p class="ellipsis text-h6 q-mb-none text-l-1">{{ channel.name }}</p>
+                            <p class="ellipsis text-h6 q-mb-none text-c-1">{{ channel.name }}</p>
                         </div>
                     </div>
                 </q-card>
                 <form-field v-model="channel.name" title="Name"/>
                 <div class="q-mt-md">
-                    <p class="text-h6 text-weight-bold q-mb-xs text-l-1">Visibility</p>
+                    <p class="text-h6 text-weight-bold q-mb-xs text-c-1">Visibility</p>
                     <div class="row justify-between">
-                        <q-select v-model="channel.visibility" :options="visibilityOptions" dense standout="l-2" class="l-2 col always-primary  q-mr-sm" rounded popup-content-class="l-2 text-l-3" content-style="border-radius: 15px;"/>
-                        <q-btn flat no-caps size="13px" class="col q-ml-sm l-5 q-pa-sm text-weight-bold text-l-1" @click="changeIcon">Change icon</q-btn> 
+                        <q-select v-model="channel.visibility" :options="visibilityOptions" dense standout="c-2" class="c-2 col always-primary  q-mr-sm" rounded popup-content-class="c-2 text-c-3" content-style="border-radius: 15px;"/>
+                        <q-btn flat no-caps size="13px" class="col q-ml-sm c-5 q-pa-sm text-weight-bold text-c-1" @click="changeIcon">Change icon</q-btn> 
                     </div>
                 </div>
 
                 <div class="row justify-between q-mt-lg">
-                    <q-btn flat no-caps size="13px" class="col negative q-pa-sm q-mr-sm text-weight-bold text-l-1" @click="leaveChannel">Leave channel</q-btn> 
-                    <q-btn flat no-caps size="13px" class="col negative q-pa-sm q-ml-sm text-weight-bold text-l-1" @click="closeChannel">Close channel</q-btn> 
+                    <q-btn flat no-caps size="13px" class="col negative q-pa-sm q-mr-sm text-weight-bold text-c-1" @click="leaveChannel">Leave channel</q-btn> 
+                    <q-btn flat no-caps size="13px" class="col negative q-pa-sm q-ml-sm text-weight-bold text-c-1" @click="closeChannel">Close channel</q-btn> 
                 </div>
             </div>
 
-            <div class="col-12 col-md-6">
+            <div class="coc-12 col-md-6">
                 <div class="row items-center justify-between q-mb-md">
-                    <p class="text-h6 text-weight-bold q-mb-xs text-l-1">Members</p>
+                    <p class="text-h6 text-weight-bold q-mb-xs text-c-1">Members</p>
                     <div>
-                        <q-btn flat no-caps icon="add" size="13px" class="col l-5 q-pa-sm text-weight-bold text-l-1" @click="inviteMember">Invite</q-btn> 
-                        <q-btn flat no-caps size="13px" class="col l-5 q-pa-sm text-weight-bold text-l-1" @click="showMembers">Show all</q-btn> 
+                        <q-btn flat no-caps icon="add" size="13px" class="col c-5 q-pa-sm text-weight-bold text-c-1" @click="inviteMember">Invite</q-btn> 
+                        <q-btn flat no-caps size="13px" class="col c-5 q-pa-sm text-weight-bold text-c-1" @click="showMembers">Show all</q-btn> 
                     </div>
                 </div>
 
                 <q-card
                     v-for="member in members"
                     :key="member.id"
-                    class="l-5 q-pa-sm q-mb-sm row items-center justify-between"
+                    class="c-5 q-pa-sm q-mb-sm row items-center justify-between"
                 >
                     <div class="row items-center q-gutter-sm">
                         <q-avatar size="40px">
@@ -54,7 +54,7 @@
                     <div>
                         <q-chip
                             v-if="member.role === 'admin'"
-                            color="l-4"
+                            color="c-4"
                             text-color="white"
                             dense
                             label="Admin"
@@ -65,7 +65,7 @@
                             dense
                             flat
                             icon="remove_circle_outline"
-                            color="l-2"
+                            color="c-2"
                             class="q-ml-sm"
                         />
                     </div>

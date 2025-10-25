@@ -77,5 +77,5 @@ export default defineComponent({
     }
 
     .bubble.their { background: #fff; color: #1f1f1f; }
-    .bubble.mine  { background: var(--l-2); color: #fff; margin-left: auto; }
+    .bubble.mine  { background: var(--c-2); color: #fff; margin-left: auto; }
 </style>

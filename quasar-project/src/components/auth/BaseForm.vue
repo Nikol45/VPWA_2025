@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="localShow">
-    <q-card class="my_card q-pa-md shadow-2 l-2 relative-position">
+    <q-card class="my_card q-pa-md shadow-2 c-2 relative-position">
       <q-btn
         v-if="cancel"
         flat
@@ -12,14 +12,14 @@
         @click="localShow = false"
       />
       <q-card-section class="text-center">
-        <div class="text-l-5 text-h5 text-weight-bold">{{ title }}</div>
+        <div class="text-c-5 text-h5 text-weight-bold">{{ title }}</div>
       </q-card-section>
       <q-card-section>
         <q-form ref="qForm" @submit.prevent="submitForm">
           <div v-for="field in fields" :key="field.model">
-            <q-input standout bg-color="accent" class="always-primary q-mb-sm text-l-3" v-model="form[field.model]" :label="field.label" :type="field.type || 'text'" :rules="field.rules"></q-input>
+            <q-input standout class="c-2 always-primary q-mb-sm text-c-3" v-model="form[field.model]" :label="field.label" :type="field.type || 'text'" :rules="field.rules"></q-input>
           </div>
-          <q-btn style="border-radius: 8px;" type="submit" rounded size="md" label="Submit" no-caps class="full-width l-5 text-l-1 q-mt-md"></q-btn>
+          <q-btn style="border-radius: 8px;" type="submit" rounded size="md" label="Submit" no-caps class="full-width c-5 text-c-1 q-mt-md"></q-btn>
         </q-form>
       </q-card-section>
       <q-card-section class="text-center q-pt-none">
@@ -136,7 +136,25 @@ export default defineComponent({
 .always-primary :deep(.q-field__native),
 .always-primary :deep(.q-field__label),
 .always-primary :deep(.q-field__control),
-.always-primary :deep(.q-field__marginal) {
-  color: var(--q-primary) !important;
+.always-primary :deep(.q-field__marginal),
+.always-primary :deep(.q-field__control:hover),
+.always-primary :deep(.q-field__control:focus-within),
+.always-primary :deep(.q-field__control-container) {
+  color: var(--c-3) !important;
+  background-color: var(--c-1) !important;
+}
+
+:deep(input:-webkit-autofill),
+:deep(input:-webkit-autofill:hover),
+:deep(input:-webkit-autofill:focus),
+:deep(input:-webkit-autofill:active) {
+  -webkit-text-fill-color: var(--c-3) !important;
+  background-color: var(--c-1) !important;
+}
+
+:deep(.q-field--standout .q-field__control:before),
+:deep(.q-field--standout .q-field__control:after) {
+  background: none !important;
+  opacity: 0 !important;
 }
 </style>

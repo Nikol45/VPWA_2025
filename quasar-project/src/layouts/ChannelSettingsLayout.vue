@@ -1,16 +1,16 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header class="l-4 text-l-1">
+    <q-header class="c-4 text-c-1">
       <q-toolbar>
         <q-btn flat round dense icon="arrow_back" class="q-mr-sm" @click="goHome" />
         <div class="row items-center">
-          <p class="text-h5 text-weight-bolder text-l-1 q-mb-none">Channel settings</p>
+          <p class="text-h5 text-weight-bolder text-c-1 q-mb-none">Channel settings</p>
         </div>
         <q-space/>
         <q-btn flat round dense icon="notifications_none" class="q-mr-sm" />
       </q-toolbar>
     </q-header>
-    <q-drawer v-if="!isCompact || $route.name === 'home'" v-model="leftOpen" side="left" behavior="desktop" :width="isCompact ? $q.screen.width : 300" :overlay="isCompact" class="l-4 text-l-1 sidebar relative-position">
+    <q-drawer v-if="!isCompact || $route.name === 'home'" v-model="leftOpen" side="left" behavior="desktop" :width="isCompact ? $q.screen.width : 300" :overlay="isCompact" class="c-4 text-c-1 sidebar relative-position">
       <div class="column fit">
         <profile-block :user="user"></profile-block>
         <search-filter v-model:filter="filter" v-model="search" class="responsive-padding"></search-filter>
@@ -20,13 +20,13 @@
           </q-list>
         </q-scroll-area>
 
-        <q-btn v-if="$route.name !== 'home'" round class="l-3 text-l-1 op-95 floating-add" icon="add" size="22px" @click="createChannel"/>
+        <q-btn v-if="$route.name !== 'home'" round class="c-3 text-c-1 op-95 floating-add" icon="add" size="22px" @click="createChannel"/>
       </div>
     </q-drawer>
-    <q-page-container class="l-1">
+    <q-page-container class="c-1">
       <router-view/>
     </q-page-container>
-    <q-footer class="l-3 text-l-1 q-pa-md">
+    <q-footer class="c-3 text-c-1 q-pa-md">
       <CommandLine class="q-px-lg"></CommandLine>
     </q-footer>
   </q-layout>
@@ -131,7 +131,7 @@
 
 <style scoped>
     .search-input :deep(.q-field__control) {
-        background-color: var(--l-3);
+        background-color: var(--c-3);
     }
 
     .floating-add {

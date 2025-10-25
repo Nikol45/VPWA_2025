@@ -1,5 +1,5 @@
 <template>
-  <q-page class="l-1 q-px-sm column">
+  <q-page class="c-1 q-px-sm column">
       <q-scroll-area ref="scrollArea"
                      style="height: calc(100vh - 108px);"
                      class="no-scrollbar q-px-md q-pb-md q-gutter-md">
@@ -9,7 +9,7 @@
             <message-bubble :message="m" :user="usersById[m.userId]" :is-mine="m.userId === meId"/>
           </div>
 
-          <div v-if="typingText" class="typing-bar text-caption l-1">
+          <div v-if="typingText" class="typing-bar text-caption c-1">
             {{ typingText }}
           </div>
 

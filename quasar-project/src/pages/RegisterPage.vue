@@ -1,6 +1,6 @@
 <template>
     <q-page-container>
-        <q-page class="flex flex-center" color="l-4">
+        <q-page class="flex flex-center" color="c-4">
             <Register v-model="showRegister" @submit="handleRegistration" :close-on-submit="true" />
         </q-page>
     </q-page-container>

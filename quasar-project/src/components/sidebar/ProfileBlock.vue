@@ -1,5 +1,5 @@
 <template>
-    <div v-if="user" class="l-5 text-l-1">
+    <div v-if="user" class="c-5 text-c-1">
         <q-toolbar class="q-px-md" style="min-height:72px">
         <q-avatar size="45px" class="q-mr-md">
             <img :src="user.avatarUrl" alt="avatar" />

@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header class="l-3 text-l-1">
+    <q-header class="c-3 text-c-1">
       <q-toolbar v-if="activeChannel">
         <q-btn flat round dense icon="arrow_back" class="q-mr-sm" @click="goHome" />
         <q-avatar size="28px" class="q-mr-sm">
@@ -23,7 +23,7 @@
       behavior="desktop"
       :width="isCompact ? $q.screen.width : 300"
       :overlay="isCompact"
-      class="l-4 text-l-1 sidebar relative-position"
+      class="c-4 text-c-1 sidebar relative-position"
     >
       <div class="column fit">
         <profile-block :user="user"></profile-block>
@@ -44,7 +44,7 @@
         <q-btn
           v-if="$route.name !== 'home'"
           round
-          class="l-3 text-l-1 op-95 floating-add"
+          class="c-3 text-c-1 op-95 floating-add"
           icon="add"
           size="22px"
           @click="createChannel"
@@ -52,11 +52,11 @@
       </div>
     </q-drawer>
 
-    <q-page-container class="l-1">
+    <q-page-container class="c-1">
       <router-view />
     </q-page-container>
 
-    <q-footer class="l-3 text-l-1 q-pa-md">
+    <q-footer class="c-3 text-c-1 q-pa-md">
       <command-line :active-channel="activeChannel"></command-line>
     </q-footer>
   </q-layout>
@@ -182,10 +182,10 @@ export default defineComponent({
 
 <style scoped>
 .message-input :deep(.q-field__control) {
-  background-color: var(--l-4);
+  background-color: var(--c-4);
 }
 .search-input :deep(.q-field__control) {
-  background-color: var(--l-3);
+  background-color: var(--c-3);
 }
 
 .floating-add {
