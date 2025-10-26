@@ -1,9 +1,24 @@
 <template>
   <q-page class="q-pa-none column items-center justify-center text-center">
-    <q-btn round unelevated class="c-3 text-c-1 op-60" icon="add" size="26px"/>
+    <q-btn round unelevated class="c-3 text-c-1 op-60" icon="add" size="26px"
+           @click="createChannel" />
     <p class="q-ma-none q-mt-md text-subtitle1 text-grey-8">No channel selected</p>
     <p class="q-ma-none text-caption text-grey-7">
       Search for or join a channel or create a new one.
     </p>
   </q-page>
 </template>
+
+<script lang="ts">
+import { defineComponent } from 'vue'
+
+export default defineComponent({
+  methods: {
+    createChannel() {
+      void this.$router.push({
+        query: { ...this.$route.query, modal: 'channels' }
+      })
+    }
+  }
+})
+</script>

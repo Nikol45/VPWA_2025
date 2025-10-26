@@ -29,8 +29,7 @@
           v-model="form.privacy"
           toggle-color="primary"
           toggle-text-color="c-1"
-          text-color="primary"
-          color="c-1"
+          text-color="c-3"
           :options="[
               { label: 'Private', value: 'private', icon: 'lock' },
               { label: 'Public', value: 'public', icon: 'public' }
@@ -96,7 +95,7 @@ export default defineComponent({
           color: 'negative',
           timeout: 2500
         });
-      
+
         (this.$refs.file as HTMLInputElement).value = ''
         this.form.image = null
         this.previewUrl = null
@@ -148,6 +147,11 @@ export default defineComponent({
 .preview-img{
   width:100%; height:100%;
   object-fit:cover; border-radius:50%;
+}
+
+.my-toggle .q-btn--active {
+  background-color: var(--c-3) !important;
+  color: var(--c-1) !important;
 }
 
 </style>

@@ -1,32 +1,49 @@
 <template>
   <q-page class="c-1 q-px-sm column">
-      <q-scroll-area ref="scrollArea"
-                     style="height: calc(100vh - 108px);"
-                     class="no-scrollbar q-px-md q-pb-md q-gutter-md">
+    <q-scroll-area ref="scrollArea"
+                   style="height: calc(100vh - 108px);"
+                   class="no-scrollbar q-px-md q-pb-md q-gutter-md"
+    >
+      <q-infinite-scroll reverse @load="onInfiniteLoad" >
+        <div v-for="m in messages" :key="m.id" class="row">
+          <message-bubble :message="m" :user="usersById[m.userId]" :is-mine="m.userId === meId" :class="{ mention: isMention(m.text) }"/>
+        </div>
 
-        <q-infinite-scroll reverse @load="onInfiniteLoad" >
-          <div v-for="m in messages" :key="m.id" class="row">
-            <message-bubble :message="m" :user="usersById[m.userId]" :is-mine="m.userId === meId" :class="{ mention: isMention(m.text) }"/>
+        <div v-if="typingBarText"
+             class="typing-bar text-caption c-1"
+             @click="openTypingPreview">
+          {{ typingBarText }}
+        </div>
+
+        <template #loading>
+          <div class="row justify-center q-my-md">
+            <q-spinner-dots size="24px" />
           </div>
+        </template>
+      </q-infinite-scroll>
+    </q-scroll-area>
 
-          <div v-if="typingText" class="typing-bar text-caption c-1">
-            {{ typingText }}
-          </div>
+    <typing-popup
+      v-model="showTyping"
+      :name="typingAuthorName"
+      :typing-text="activeTypingText"
+      @back="onTypingBack"
+    />
 
-          <template #loading>
-            <div class="row justify-center q-my-md">
-              <q-spinner-dots size="24px" />
-            </div>
-          </template>
-        </q-infinite-scroll>
-      </q-scroll-area>
+    <typing-select-popup
+      v-model="showTypingSelect"
+      :options="typingSelectOptions"
+      @select="onTypingSelect"
+    />
   </q-page>
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from 'vue'
+import { defineComponent, watch, nextTick } from 'vue'
 import { type QScrollArea, useQuasar } from 'quasar'
 import MessageBubble from 'src/components/MessageBubble.vue'
+import TypingPopup from 'src/components/popups/TypingPopup.vue'
+import TypingSelectPopup from 'src/components/popups/TypingSelectPopup.vue'
 
 interface Message {
   id: string
@@ -43,9 +60,15 @@ interface User {
   status: string
 }
 
+interface TypingOption {
+  id: string
+  label: string
+  avatar?: string
+}
+
 export default defineComponent({
   name: 'ChannelChat',
-  components: { MessageBubble },
+  components: { MessageBubble, TypingPopup, TypingSelectPopup },
 
   setup() {
     const $q = useQuasar()
@@ -79,7 +102,7 @@ export default defineComponent({
     )
 
     return { showSystemNotification }
-  },  
+  },
 
   data() {
     return {
@@ -116,28 +139,77 @@ export default defineComponent({
       ] as Message[],
 
       typingUserIds: [] as string[],
+
+      showTyping: false,
+
+      typingAuthorId: 'u-nikol',
+
+      typingByUser: {
+        'u-nikol':
+          'Ináč rn som si všimla, že ani dis nemá dobre spravené tie guličky statusu, ten outline neni vy',
+
+        'u-simca':
+          'podľa mňa by sme to mali'
+      } as Record<string, string>,
+
+      showTypingSelect: false,
+      typingSelectOptions: [] as TypingOption[],
+
       loadTimer: null as number | null
     }
   },
 
   computed: {
-    typingText(): string | null {
+    typingBarText(): string | null {
       if (this.typingUserIds.length === 0) return null
       const names = this.typingUserIds.map(id => this.usersById[id]?.name).filter(Boolean) as string[]
       if (names.length === 0) return null
-      const list = names.join(', ')
       const verb = names.length > 1 ? 'píšu…' : 'píše…'
-      return `${list} ${verb}`
+      return `${names.join(', ')} ${verb}`
+    },
+    typingAuthorName(): string {
+      return this.usersById[this.typingAuthorId]?.name ?? 'User'
+    },
+    activeTypingText(): string {
+      return this.typingByUser[this.typingAuthorId] ?? ''
     }
   },
 
   mounted() {
     this.startTyping('u-nikol')
-    requestAnimationFrame(() => this.scrollToBottom())
+    this.startTyping('u-simca')
+    void nextTick(() => this.scrollToBottom())
   },
 
-
   methods: {
+    onTypingBack(){
+      this.showTyping = false
+      this.showTypingSelect = true
+    },
+
+    openTypingPreview() {
+      const ids = this.typingUserIds.filter(id => this.usersById[id])
+      const first = ids[0] ?? null
+
+      if (ids.length <= 1) {
+        if (first) this.typingAuthorId = first
+        this.showTyping = !!first
+        return
+      }
+
+      this.typingSelectOptions = ids.map(id => {
+        const u = this.usersById[id]
+        return { id, label: u?.name ?? id, ...(u?.avatar ? { avatar: u.avatar } : {}) }
+      })
+      void nextTick(() => { this.showTypingSelect = true })
+    },
+
+    onTypingSelect(id: string) {
+      this.typingAuthorId = id
+      this.showTyping = true
+      this.showTypingSelect = false
+    },
+
     scrollToBottom() {
       const scroll = this.$refs.scrollArea as QScrollArea | undefined
       scroll?.setScrollPercentage('vertical', 10)
@@ -150,7 +222,7 @@ export default defineComponent({
       }
       this.loadTimer = window.setTimeout(() => {
         this.loadOlderBatch(5)
-        done() // done(true) ak už nič viac nemáš
+        done()
         this.loadTimer = null
       }, 2000)
     },
@@ -168,23 +240,11 @@ export default defineComponent({
     },
 
     startTyping(userId: string) {
-      if (!this.typingUserIds.includes(userId)) {
-        this.typingUserIds.push(userId)
-      }
+      this.typingUserIds = [...new Set([...this.typingUserIds, userId])]
     },
 
     stopTyping(userId: string) {
       this.typingUserIds = this.typingUserIds.filter(id => id !== userId)
-    },
-
-    loadOlder() {
-      this.messages.unshift({
-        id: 'm0',
-        channelId: 'ch-1',
-        userId: 'u-simca',
-        text: 'staršia správa',
-        time: 'štvrtok 16:20'
-      })
     },
 
     isMention(text: string): boolean {
@@ -199,7 +259,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 .typing-bar {
   position: sticky;
   bottom: 0;
@@ -208,5 +267,4 @@ export default defineComponent({
   cursor: pointer;
   text-align: left;
 }
-
 </style>
