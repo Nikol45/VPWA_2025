@@ -189,23 +189,33 @@ export default defineComponent({
 
     methods: {
         changeIcon() {
-        const input = document.createElement('input')
-        input.type = 'file'
-        input.accept = 'image/*'
-        input.click()
+            const input = document.createElement('input')
+            input.type = 'file'
+            input.accept = 'image/*'
+            input.click()
 
-        input.onchange = (event: Event) => {
-            const file = (event.target as HTMLInputElement).files?.[0]
-            if (file) {
-            const reader = new FileReader()
-            reader.onload = e => {
-                const previewUrl = e.target?.result as string
-                if (this.activeChannel)
-                    this.activeChannel.avatar = previewUrl
+            input.onchange = (event: Event) => {
+                const file = (event.target as HTMLInputElement).files?.[0]
+                if (file) {
+                    if (!file.type.startsWith('image/')) {
+                        this.$q.notify({
+                            type: 'warning',
+                            message: 'Please select a valid image file (JPEG, PNG, etc.)',
+                            position: 'bottom-right',
+                            color: 'negative',
+                            timeout: 2500
+                        });
+                        return
+                    }
+                    const reader = new FileReader()
+                    reader.onload = e => {
+                        const previewUrl = e.target?.result as string
+                        if (this.activeChannel)
+                            this.activeChannel.avatar = previewUrl
+                    }
+                    reader.readAsDataURL(file)
+                }
             }
-            reader.readAsDataURL(file)
-            }
-      }
         },
 
         showMembers() {

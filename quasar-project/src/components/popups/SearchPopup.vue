@@ -30,8 +30,7 @@
                 <div class="rad-15 c-1 text-c-3 q-py-sm q-px-md">{{ ch.name }}</div>
               </div>
               <div class="col-auto">
-                <q-btn dense no-caps label="Join" @click="$emit('join', ch.id)"
-                       class="c-5 text-c-1 rad-15 q-px-md" />
+                <q-btn dense no-caps label="Join" @click="$emit('join', ch.id)" class="c-5 text-c-1 rad-15 q-px-md"/>
               </div>
             </div>
           </q-list>

@@ -7,7 +7,6 @@
           <p class="text-h5 text-weight-bolder text-c-1 q-mb-none">Channel settings</p>
         </div>
         <q-space/>
-        <q-btn flat round dense icon="notifications_none" class="q-mr-sm" />
       </q-toolbar>
     </q-header>
     <q-drawer v-if="!isCompact || $route.name === 'home'" v-model="leftOpen" side="left" behavior="desktop" :width="isCompact ? $q.screen.width : 300" :overlay="isCompact" class="c-4 text-c-1 sidebar relative-position">
@@ -20,9 +19,7 @@
           </q-list>
         </q-scroll-area>
 
-        <q-btn v-if="$route.name !== 'home'"
-               round class="c-3 text-c-1 op-95 floating-add"
-               icon="add" size="22px" @click="createChannel"/>
+        <q-btn v-if="$route.name !== 'home'" round class="c-3 text-c-1 op-95 floating-add" icon="add" size="22px" @click="createChannel"/>
       </div>
     </q-drawer>
     <q-page-container class="c-1">

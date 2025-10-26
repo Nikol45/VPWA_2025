@@ -17,9 +17,8 @@
       </q-card-section>
 
       <q-card-actions align="between">
-        <q-btn flat no-caps class="text-c-3" label="Back" @click="$emit('back')" />
-        <q-btn no-caps class="c-5 text-c-1" label="Join"  @click="submit"
-               :disable="(invite?.trim().length || 0) < 8"  />
+        <q-btn flat no-caps class="text-c-3" label="Back" @click="$emit('back')"/>
+        <q-btn no-caps class="c-5 text-c-1" label="Join"  @click="submit" :disable="(invite?.trim().length || 0) < 8"/>
       </q-card-actions>
     </q-card>
   </q-dialog>

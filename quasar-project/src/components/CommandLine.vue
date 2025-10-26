@@ -2,7 +2,14 @@
     <div class="row items-center full-width q-gutter-sm">
         <q-input ref="cmdInput" dense standout="c-4" class="c-4 col q-ma-xxs" placeholder="Type a message or /command" v-model="msg" input-class="text-white" @keyup.enter="sendMessage">
             <template v-if="activeChannel" #prepend>
-                <q-btn flat round dense icon="emoji_emotions"/>
+                <q-btn flat round dense class="text-c-1" icon="emoji_emotions" ref="emojiBtn"/>
+                <q-menu anchor="top left" self="bottom left" ref="emojiMenu" transition-show="jump-down" transition-hide="jump-up" class="rad-15 c-1" :offset="[0, 4]">
+                    <div class="q-pa-sm emoji-grid">
+                        <q-btn v-for="emoji in emojis" :key="emoji" flat dense size="md" @click="addEmoji(emoji)">
+                            {{ emoji }}
+                        </q-btn>
+                    </div>
+                </q-menu>
             </template>
         </q-input>
         <q-menu ref="cmdMenu" :target="cmdTarget" :no-focus="true" v-model="showMenu" v-show="filteredSuggestions.length && showMenu" anchor="bottom left" self="top left">
@@ -57,7 +64,13 @@
             return {
                 showMenu: false,
                 msg:'',
-                commands: ['/list', '/join', '/invite', '/kick', '/cancel', '/revoke', '/quit']
+                commands: ['/list', '/join', '/invite', '/kick', '/cancel', '/revoke', '/quit'],
+                emojis: [
+                    '😀','😁','😂','🤣','😊','😍','😎','😏','😢','😭','😡','🤔',
+                    '🤗','😇','🙃','😴','😜','😬','🥰','🤩','🤓','😈','👀','💅',
+                    '💫','🔥','✨','💖','💩','👍','👎','🙏','🙌','👏','💪','🤝',
+                    '😺','😸','😹','😻','😼','😽','🙀','😿','😾','🐱','🐈','🐈‍⬛'
+                ]
             }
         },
 
@@ -87,7 +100,13 @@
 
                 this.msg = ''
                 this.showMenu = false
-            }
+            },
+
+            addEmoji(emoji: string) {
+                this.msg += emoji
+                const menu = this.$refs.emojiMenu as QMenu
+                menu.hide()
+            },
         },
 
         computed: {
@@ -176,5 +195,15 @@
 
     .suggestion {
         max-height: 400px;
+    }
+
+    .emoji-grid {
+        width: 260px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .emoji-grid::-webkit-scrollbar {
+        display: none;
     }
 </style>

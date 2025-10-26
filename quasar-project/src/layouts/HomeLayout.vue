@@ -330,23 +330,19 @@ export default defineComponent({
       this.searchResults = []
     },
 
-
     openCreate() { this.goModal('channels-create') },
     openJoin()   { this.goModal('channels-join') },
     openSearch() { this.goModal('channels-search') },
     backToSelect() { this.goModal('channels') },
 
-    // submit create
     handleCreate() {
       this.closeModal()
     },
 
-    // submit join
     handleJoin() {
       this.closeModal()
     },
 
-    // search
     handleSearch(query: string) {
       const all = [
         { id: '1', name: 'Study Together' },

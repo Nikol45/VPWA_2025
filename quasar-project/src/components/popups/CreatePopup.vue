@@ -10,7 +10,7 @@
           <img v-if="previewUrl" :src="previewUrl" alt="preview" class="preview-img" />
           <template v-else>
             <q-icon name="photo_camera" size="md" />
-            <div class="text-c-1 text-subtitle2 text-weight-bold">UPLOAD</div>
+            <div class="text-c-1 text-subtitle2 text-weight-bold">Upload</div>
           </template>
           <input ref="file" type="file" accept="image/*" class="hidden" @change="onFile" />
           <div class="plus-badge c-3 text-c-1"  v-if="!previewUrl">
@@ -41,10 +41,7 @@
 
       <q-card-actions align="between" class="q-mt-lg">
         <q-btn flat no-caps class="text-c-3" label="Back" @click="$emit('back')" />
-        <q-btn no-caps class="c-5 text-c-1 rad-15"
-               label="Create" @click="submit"
-               :disable="!form.name || !form.privacy || !form.image"
-                />
+        <q-btn no-caps class="c-5 text-c-1 rad-15" label="Create" @click="submit" :disable="!form.name || !form.privacy || !form.image"/>
       </q-card-actions>
     </q-card>
   </q-dialog>

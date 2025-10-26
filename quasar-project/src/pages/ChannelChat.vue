@@ -1,9 +1,6 @@
 <template>
   <q-page class="c-1 q-px-sm column">
-    <q-scroll-area ref="scrollArea"
-                   style="height: calc(100vh - 108px);"
-                   class="no-scrollbar q-px-md q-pb-md q-gutter-md"
-    >
+    <q-scroll-area ref="scrollArea" style="height: calc(100vh - 108px);" class="no-scrollbar q-px-md q-pb-md q-gutter-md">
       <q-infinite-scroll reverse @load="onInfiniteLoad" >
         <div v-for="m in messages" :key="m.id" class="row">
           <message-bubble :message="m" :user="usersById[m.userId]" :is-mine="m.userId === meId" :class="{ mention: isMention(m.text) }"/>
@@ -160,6 +157,7 @@ export default defineComponent({
   },
 
   computed: {
+    
     typingBarText(): string | null {
       if (this.typingUserIds.length === 0) return null
       const names = this.typingUserIds.map(id => this.usersById[id]?.name).filter(Boolean) as string[]
@@ -167,9 +165,11 @@ export default defineComponent({
       const verb = names.length > 1 ? 'píšu…' : 'píše…'
       return `${names.join(', ')} ${verb}`
     },
+
     typingAuthorName(): string {
       return this.usersById[this.typingAuthorId]?.name ?? 'User'
     },
+
     activeTypingText(): string {
       return this.typingByUser[this.typingAuthorId] ?? ''
     }
