@@ -1,5 +1,5 @@
 <template>
-    <q-item clickable class="channel-item" @click="$emit('click', channel)">
+    <q-item clickable :class="[ channel.invited ? 'invited-highlight' : 'c-4, text-c-1']" @click="$emit('click', channel)">
         <q-item-section avatar>
             <q-avatar size="36px">
                 <img :src="channel.avatar" :alt="channel.name" />
@@ -29,6 +29,7 @@ interface Channel {
   members: number
   private: boolean
   avatar: string
+  invited: boolean
 }
 
 export default defineComponent ({
@@ -45,3 +46,15 @@ export default defineComponent ({
 })
 
 </script>
+
+<style>
+    @keyframes pulse-highlight {
+        0%   { background-color: var(--c-4); }
+        50%  { background-color: var(--c-2); color: var(--c-5)}
+        100% { background-color: var(--c-4); }
+    }
+
+    .invited-highlight {
+        animation: pulse-highlight 2s infinite;
+    }
+</style>

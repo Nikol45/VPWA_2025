@@ -35,60 +35,61 @@
 </template>
 
 <script lang="ts">
-    import CommandLine from 'src/components/CommandLine.vue';
-    import { defineComponent } from 'vue'
-    import ProfileBlock from 'src/components/sidebar/ProfileBlock.vue'
-    import SearchFilter from 'src/components/sidebar/SearchFilter.vue'
-    import ChannelBlock from 'src/components/sidebar/ChannelBlock.vue'
+  import CommandLine from 'src/components/CommandLine.vue';
+  import { defineComponent } from 'vue'
+  import ProfileBlock from 'src/components/sidebar/ProfileBlock.vue'
+  import SearchFilter from 'src/components/sidebar/SearchFilter.vue'
+  import ChannelBlock from 'src/components/sidebar/ChannelBlock.vue'
 
-    type Visibility = 'all' | 'public' | 'private'
+  type Visibility = 'all' | 'public' | 'private'
 
-    interface User {
-        nickname: string
-        name: string
-        avatarUrl: string
-        status: string
-    }
+  interface User {
+      nickname: string
+      name: string
+      avatarUrl: string
+      status: string
+  }
 
-    interface Channel {
-        id: string
-        name: string
-        members: number
-        private: boolean
-        avatar: string
-    }
+  interface Channel {
+      id: string
+      name: string
+      members: number
+      private: boolean
+      avatar: string
+      invited: boolean
+  }
 
   export default defineComponent({
     name: 'ChannelSettingsLayout',
     components: { CommandLine, ProfileBlock, SearchFilter, ChannelBlock },
 
     data() {
-        return {
-            leftOpen: true,
-            search: '',
-            filter: 'all' as Visibility,
+      return {
+        leftOpen: true,
+        search: '',
+        filter: 'all' as Visibility,
 
-            user: {
-                nickname: 'FireFly x3',
-                name: 'Svetlana Pivarčiová',
-                avatarUrl: '/avatars/users/firefly.jpg',
-                status: 'online'
-            } as User,
+        user: {
+          nickname: 'FireFly x3',
+          name: 'Svetlana Pivarčiová',
+          avatarUrl: '/avatars/users/firefly.jpg',
+          status: 'online'
+        } as User,
 
-            channels: [
-                { id: '1',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png' },
-                { id: '2',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png' },
-                { id: '3',  name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png' },
-                { id: '4',  name: 'Share & Care',        members: 27,   private: true,  avatar: '/avatars/channels/cerveny.png' },
-                { id: '5',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png' },
-                { id: '6',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png' },
-                { id: '7',  name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png' },
-                { id: '8',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png' },
-                { id: '9',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png' },
-                { id: '10', name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png' },
-                { id: '11', name: 'Share & Care',        members: 27,   private: true,  avatar: '/avatars/channels/cerveny.png' }
-            ] as Channel[]
-        }
+        channels: [
+          { id: '1',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png',       invited: true},
+          { id: '2',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png',       invited: false},
+          { id: '3',  name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png',  invited: false},
+          { id: '4',  name: 'Share & Care',        members: 27,   private: true,  avatar: '/avatars/channels/cerveny.png',    invited: false},
+          { id: '5',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png',       invited: false},
+          { id: '6',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png',       invited: false},
+          { id: '7',  name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png',  invited: false},
+          { id: '8',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png',       invited: false},
+          { id: '9',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png',       invited: false},
+          { id: '10', name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png',  invited: false},
+          { id: '11', name: 'Share & Care',        members: 27,   private: true,  avatar: '/avatars/channels/cerveny.png',    invited: false}
+        ] as Channel[]
+      }
     },
 
     methods: {
@@ -96,7 +97,9 @@
         const id = this.$route.params.id
         if (id) {
           void this.$router.push({ name: 'channel', params: { id } })
-        } else {
+        }
+
+        else {
           void this.$router.back()
         }
       },
@@ -104,13 +107,17 @@
       updateLeftOpen() {
         if (this.isCompact) {
             this.leftOpen = this.$route.name === 'home'
-        } else {
+        }
+        
+        else {
             this.leftOpen = true
         }
       },
 
       goToChannel(c: Channel) {
-        if (this.$route.params.id === c.id) return
+        if (c.invited) {
+          c.invited = false
+        }
         void this.$router.push({ name: 'channel', params: { id: c.id } })
       },
 
@@ -119,25 +126,29 @@
 
       handleProfileAction(action: string) {
         switch (action) {
-          case 'settings': void this.$router.push({ name: 'profile-settings' }); break
-          case 'notify': ; break
+          case 'settings':
+            void this.$router.push({ name: 'profile-settings' });
+            break
+          case 'notify':
+            ;
+            break
         }
       }
     },
 
     computed: {
 
-        isCompact(): boolean { return this.$q.screen.width < 660 },
+      isCompact(): boolean { return this.$q.screen.width < 660 },
 
-        filtered(): Channel[] {
-            const s = this.search.trim().toLowerCase()
-            return this.channels.filter(c => this.filter === 'all' ||(this.filter === 'public' && !c.private) || (this.filter === 'private' && c.private)).filter(c => (s ? c.name.toLowerCase().includes(s) : true))
-        },
+      filtered(): Channel[] {
+        const s = this.search.trim().toLowerCase()
+        return this.channels.filter(c => this.filter === 'all' ||(this.filter === 'public' && !c.private) || (this.filter === 'private' && c.private)).filter(c => (s ? c.name.toLowerCase().includes(s) : true))
+      }
     },
 
     watch: {
-        '$route.name'() { this.updateLeftOpen() },
-        isCompact() { this.updateLeftOpen() }
+      '$route.name'() { this.updateLeftOpen() },
+      isCompact() { this.updateLeftOpen() }
     },
 
     mounted() { this.updateLeftOpen() }
@@ -146,20 +157,20 @@
 </script>
 
 <style scoped>
-    .search-input :deep(.q-field__control) {
-        background-color: var(--c-3);
-    }
+  .search-input :deep(.q-field__control) {
+    background-color: var(--c-3);
+  }
 
-    .floating-add {
-        position: absolute;
-        right: 40px;
-        bottom: 30px;
-    }
+  .floating-add {
+    position: absolute;
+    right: 40px;
+    bottom: 30px;
+  }
 
-    @media (min-width: 350px) and (max-width: 590px) {
-        .responsive-padding {
-            padding-left: 20px;
-            padding-right: 20px;
-        }
+  @media (min-width: 350px) and (max-width: 590px) {
+    .responsive-padding {
+      padding-left: 20px;
+      padding-right: 20px;
     }
+  }
 </style>

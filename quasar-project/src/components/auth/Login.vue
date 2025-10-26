@@ -1,9 +1,10 @@
 <template>
-    <BaseForm v-model="localShow" :cancel=false title="Login" :fields="fields" note="Don't have an account?" :close-on-submit="closeOnSubmit" @submit="onSubmit" />
+    <BaseForm persistent v-model="localShow" :cancel=false title="Login" :fields="fields" note="Don't have an account? Sign up" note-route="/register" :close-on-submit="closeOnSubmit" @submit="onSubmit"/>
 </template>
 
 <script lang="ts">
-    import BaseForm from './BaseForm.vue';
+    import BaseForm from './BaseForm.vue'
+    import { defineComponent } from 'vue'
 
     interface Field {
         label: string
@@ -13,7 +14,7 @@
         initial?: string
     }
 
-    export default {
+    export default defineComponent({
         name: 'LoginPopup',
         components: { BaseForm },
 
@@ -22,6 +23,7 @@
                 type: Boolean,
                 required: true,
             },
+
             closeOnSubmit: {
                 type: Boolean,
                 default: true
@@ -32,16 +34,17 @@
             return {
                 localShow: this.modelValue,
                 fields: [
-                    { label: 'Email', model: 'email', type: 'email', rules: [(val: string) => !!val || 'Email is required'] },
-                    { label: 'Password', model: 'password', type: 'password', rules: [(val: string) => !!val || 'Password is required'] },
+                    { label: 'Email *', model: 'email', type: 'email', rules: [(val: string) => !!val || 'Email is required'] },
+                    { label: 'Password *', model: 'password', type: 'password', rules: [(val: string) => !!val || 'Password is required'] },
                 ] as Field[],
-            };
+            }
         },
 
         watch: {
             modelValue(val : boolean) {
                 this.localShow = val
             },
+
             localShow(val : boolean) {
                 this.$emit('update:modelValue', val)
             }
@@ -52,5 +55,5 @@
                 this.$emit('submit', formData)
             }
         }
-    }
+    })
 </script>

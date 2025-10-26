@@ -55,7 +55,7 @@
     </q-page-container>
 
     <q-footer class="c-3 text-c-1 q-pa-md">
-      <command-line :active-channel="activeChannel"></command-line>
+      <command-line :active-channel="activeChannel" :membersByChannel="membersByChannel" @command="handleCommand" @message="handleMessage" @mention="handleMention"></command-line>
     </q-footer>
   </q-layout>
 
@@ -138,6 +138,7 @@ interface Channel {
   members: number
   private: boolean
   avatar: string
+  invited: boolean
 }
 
 export default defineComponent({
@@ -161,17 +162,17 @@ export default defineComponent({
       } as User,
 
       channels: [
-        { id: '1',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png' },
-        { id: '2',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png' },
-        { id: '3',  name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png' },
-        { id: '4',  name: 'Share & Care',        members: 27,   private: true,  avatar: '/avatars/channels/cerveny.png' },
-        { id: '5',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png' },
-        { id: '6',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png' },
-        { id: '7',  name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png' },
-        { id: '8',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png' },
-        { id: '9',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png' },
-        { id: '10', name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png' },
-        { id: '11', name: 'Share & Care',        members: 27,   private: true,  avatar: '/avatars/channels/cerveny.png' }
+        { id: '1',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png',       invited: true},
+        { id: '2',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png',       invited: false},
+        { id: '3',  name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png',  invited: false},
+        { id: '4',  name: 'Share & Care',        members: 27,   private: true,  avatar: '/avatars/channels/cerveny.png',    invited: false},
+        { id: '5',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png',       invited: false},
+        { id: '6',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png',       invited: false},
+        { id: '7',  name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png',  invited: false},
+        { id: '8',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png',       invited: false},
+        { id: '9',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png',       invited: false},
+        { id: '10', name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png',  invited: false},
+        { id: '11', name: 'Share & Care',        members: 27,   private: true,  avatar: '/avatars/channels/cerveny.png',    invited: false}
       ] as Channel[],
 
       showSelect: false,
@@ -366,11 +367,18 @@ export default defineComponent({
     },
 
     goToChannel(c: Channel) {
+      if (c.invited) {
+        c.invited = false
+      }
       if (this.$route.params.id === c.id) return
       void this.$router.push({ name: 'channel', params: { id: c.id } })
     },
 
-    sendMessage() {
+    handleMessage() {
+    },
+
+    handleMention() {
+
     },
 
     goHome() {
@@ -379,8 +387,22 @@ export default defineComponent({
 
     handleProfileAction(action: string) {
       switch (action) {
-        case 'settings': void this.$router.push({ name: 'profile-settings' }); break
-        case 'notify': ; break
+        case 'settings': 
+          void this.$router.push({ name: 'profile-settings' });
+          break
+        case 'notify':
+          ;
+          break
+      }
+    },
+
+    handleCommand({ command, args }: { command: string, args: string[] }) {
+      switch (command) {
+        case 'list':
+          this.toggleMembers()
+          break
+        default:
+          console.log('Unknown command:', command, args)
       }
     },
 

@@ -41,7 +41,7 @@
           <p class="text-h6 text-weight-bold text-c-1 q-mt-lg">Choose app theme:</p>
 
           <div class="theme-row row q-col-gutter-md q-mt-md c-3 justify-between">
-            <q-card flat v-for="theme in themes" :key="theme.id" :class="['col-5', selectedTheme === theme.id ? 'picked' : '']" class="c-5 cursor-pointer q-pa-md flex flex-center column" @click="selectTheme(theme.id)">
+            <q-card flat v-for="theme in themes" :key="theme.id" :class="['theme-item col-6 col-sm-3 q-ma-xs', selectedTheme === theme.id ? 'picked' : '']" class="c-5 cursor-pointer q-pa-md flex flex-center column" @click="selectTheme(theme.id)">
               <q-avatar size="60px">
                 <img :src="theme.preview"/>
               </q-avatar>
@@ -104,7 +104,9 @@ export default defineComponent({
 
       themes: [
         { id: 'L', name: 'Lilac dream', preview: '/themes/gradient_lilac.png' },
-        { id: 'B', name: 'Midnight blue', preview: '/themes/gradient_blue.png' }
+        { id: 'B', name: 'Midnight blue', preview: '/themes/gradient_blue.png' },
+        { id: 'P', name: 'Pink chocolate', preview: '/themes/gradient_choco.png' },
+        { id: 'G', name: 'Mystical forest', preview: '/themes/gradient_forest.png' }
       ],
 
       statusOptions: [
@@ -229,5 +231,9 @@ export default defineComponent({
     border-width: 10px;
     border-style: solid;
     box-shadow: 0 0 6px currentColor !important;
+  }
+
+  .theme-item {
+    max-width: 150px;
   }
 </style>
