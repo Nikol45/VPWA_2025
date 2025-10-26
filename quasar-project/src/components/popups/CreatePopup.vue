@@ -81,6 +81,28 @@ export default defineComponent({
 
     onFile(e: Event){
       const file = (e.target as HTMLInputElement).files?.[0] || null
+
+      if (!file) {
+        this.form.image = null
+        this.previewUrl = null
+        return
+      }
+
+      if (!file.type.startsWith('image/')) {
+        this.$q.notify({
+          type: 'warning',
+          message: 'Please select a valid image file (JPEG, PNG, etc.)',
+          position: 'bottom-right',
+          color: 'negative',
+          timeout: 2500
+        });
+      
+        (this.$refs.file as HTMLInputElement).value = ''
+        this.form.image = null
+        this.previewUrl = null
+        return
+      }
+
       this.form.image = file
       if (this.previewUrl) URL.revokeObjectURL(this.previewUrl)
       this.previewUrl = file ? URL.createObjectURL(file) : null

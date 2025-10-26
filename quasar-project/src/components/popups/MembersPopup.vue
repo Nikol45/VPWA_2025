@@ -9,7 +9,7 @@
       <q-card-section class="member-area q-pt-none q-mt-sm">
         <q-scroll-area class="fit">
             <div v-for="member in members" :key="member.id" class="member-item c-5 q-mb-md row justify-between items-center">
-              <profile-block class="member-item fit" :user="member" :buttons="[ { icon: 'remove_circle_outline', action: 'remove' } ]"/>
+              <profile-block class="member-item fit" :user="member" :is-admin="isAdmin" :is-private="isPrivate" :buttons="[ { icon: 'remove_circle_outline', action: 'remove' } ]"/>
             </div>
         </q-scroll-area>
       </q-card-section>
@@ -35,7 +35,19 @@
       members: {
         type: Array as PropType<Member[]>,
         required: true
-      }
+      },
+
+      isPrivate: {
+          type: Boolean,
+          required: false,
+          default: false
+      },
+
+      isAdmin: {
+          type: Boolean,
+          required: false,
+          default: false
+      },
     },
 
     emits: ['update:modelValue'],

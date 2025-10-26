@@ -26,10 +26,10 @@
       </div>
     </q-drawer>
     <q-page-container class="c-1">
-      <router-view/>
+      <router-view :current-user="user"/>
     </q-page-container>
     <q-footer class="c-3 text-c-1 q-pa-md">
-      <CommandLine class="q-px-lg"></CommandLine>
+      <CommandLine :current-user="user" class="q-px-lg"></CommandLine>
     </q-footer>
   </q-layout>
 </template>
@@ -44,19 +44,21 @@
   type Visibility = 'all' | 'public' | 'private'
 
   interface User {
-      nickname: string
-      name: string
-      avatarUrl: string
-      status: string
+    id: number
+    nickname: string
+    name: string
+    avatarUrl: string
+    status: 'online' | 'offline' | 'dnd'
+    role: string
   }
 
   interface Channel {
-      id: string
-      name: string
-      members: number
-      private: boolean
-      avatar: string
-      invited: boolean
+    id: string
+    name: string
+    members: number
+    private: boolean
+    avatar: string
+    invited: boolean
   }
 
   export default defineComponent({
@@ -70,10 +72,12 @@
         filter: 'all' as Visibility,
 
         user: {
+          id: 1,
           nickname: 'FireFly x3',
           name: 'Svetlana Pivarčiová',
           avatarUrl: '/avatars/users/firefly.jpg',
-          status: 'online'
+          status: 'online',
+          role: ''
         } as User,
 
         channels: [

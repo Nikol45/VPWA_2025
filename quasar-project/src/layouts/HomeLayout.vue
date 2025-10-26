@@ -55,7 +55,7 @@
     </q-page-container>
 
     <q-footer class="c-3 text-c-1 q-pa-md">
-      <command-line :active-channel="activeChannel" :membersByChannel="membersByChannel" @command="handleCommand" @message="handleMessage" @mention="handleMention"></command-line>
+      <command-line :current-user="user" :active-channel="activeChannel" :membersByChannel="membersByChannel" @command="handleCommand" @message="handleMessage" @mention="handleMention"></command-line>
     </q-footer>
   </q-layout>
 
@@ -126,10 +126,12 @@ declare module '@vue/runtime-core' {
 type Visibility = 'all' | 'public' | 'private'
 
 interface User {
+  id: number
   nickname: string
   name: string
   avatarUrl: string
-  status: string
+  status: 'online' | 'offline' | 'dnd'
+  role: string
 }
 
 interface Channel {
@@ -155,10 +157,12 @@ export default defineComponent({
       msg: '',
 
       user: {
+        id: 1,
         nickname: 'FireFly x3',
         name: 'Svetlana Pivarčiová',
         avatarUrl: '/avatars/users/firefly.jpg',
-        status: 'online'
+        status: 'online',
+        role: ''
       } as User,
 
       channels: [
@@ -399,7 +403,9 @@ export default defineComponent({
     handleCommand({ command, args }: { command: string, args: string[] }) {
       switch (command) {
         case 'list':
-          this.toggleMembers()
+          if (this.activeChannel) {
+            this.toggleMembers()
+          }
           break
         default:
           console.log('Unknown command:', command, args)

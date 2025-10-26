@@ -6,7 +6,7 @@
 
         <q-infinite-scroll reverse @load="onInfiniteLoad" >
           <div v-for="m in messages" :key="m.id" class="row">
-            <message-bubble :message="m" :user="usersById[m.userId]" :is-mine="m.userId === meId"/>
+            <message-bubble :message="m" :user="usersById[m.userId]" :is-mine="m.userId === meId" :class="{ mention: isMention(m.text) }"/>
           </div>
 
           <div v-if="typingText" class="typing-bar text-caption c-1">
@@ -22,9 +22,10 @@
       </q-scroll-area>
   </q-page>
 </template>
+
 <script lang="ts">
-import { defineComponent } from 'vue'
-import type { QScrollArea } from 'quasar'
+import { defineComponent, watch } from 'vue'
+import { type QScrollArea, useQuasar } from 'quasar'
 import MessageBubble from 'src/components/MessageBubble.vue'
 
 interface Message {
@@ -39,20 +40,55 @@ interface User {
   id: string
   name: string
   avatar: string
+  status: string
 }
 
 export default defineComponent({
   name: 'ChannelChat',
   components: { MessageBubble },
 
+  setup() {
+    const $q = useQuasar()
+
+    if ('Notification' in window && Notification.permission === 'denied') {
+      void Notification.requestPermission()
+    }
+
+    const showSystemNotification = () => {
+      if (!('Notification' in window)) {
+        console.warn('Browser does not support system notifications.')
+        return
+      }
+
+      if (Notification.permission === 'granted') {
+        new Notification('Nikol', {
+          body: 'Ste niekto na fakulte?',
+          icon: '/avatars/users/nikol.png',
+          badge: '/avatars/users/nikol.png',
+        })
+      }
+    }
+
+    watch(
+      () => $q.appVisible,
+      (val) => {
+        if (val === false) {
+          showSystemNotification()
+        }
+      }
+    )
+
+    return { showSystemNotification }
+  },  
+
   data() {
     return {
       meId: 'u-me',
 
       usersById: {
-        'u-nikol': { id: 'u-nikol', name: 'Nikol',  avatar: '/avatars/users/nikol.png' },
-        'u-simca': { id: 'u-simca', name: 'Simča',  avatar: '/avatars/users/simca.png' },
-        'u-me':    { id: 'u-me',    name: 'Ja',     avatar: '/avatars/users/firefly.jpg' }
+        'u-nikol': { id: 'u-nikol', name: 'Nikol',  avatar: '/avatars/users/nikol.png', status: 'online' },
+        'u-simca': { id: 'u-simca', name: 'Simča',  avatar: '/avatars/users/simca.png', status: 'dnd' },
+        'u-me':    { id: 'u-me',    name: 'Firefly',     avatar: '/avatars/users/firefly.jpg', status: 'online' }
       } as Record<string, User>,
 
       messages: [
@@ -60,7 +96,7 @@ export default defineComponent({
         { id: 'm-12', channelId: 'ch-1', userId: 'u-simca', text: 'Ta pome spinkať 💤', time: 'štvrtok 22:04' },
         { id: 'm-11', channelId: 'ch-1', userId: 'u-simca', text: 'Good nighty 🌃', time: 'štvrtok 22:04' },
         { id: 'm-10', channelId: 'ch-1', userId: 'u-me', text: 'bruuu noc prajem ženy 💫💎', time: 'štvrtok 22:05' },
-        { id: 'm-09', channelId: 'ch-1', userId: 'u-simca', text: 'Môže byť?', time: 'piatok 09:31' },
+        { id: 'm-09', channelId: 'ch-1', userId: 'u-simca', text: 'Môže byť? @Firefly', time: 'piatok 09:31' },
         { id: 'm-08', channelId: 'ch-1', userId: 'u-simca', text: 'poslala obrázok 🖼️', time: 'piatok 09:31' },
         { id: 'm-07', channelId: 'ch-1', userId: 'u-simca', text: 'Nie je to too much?', time: 'piatok 09:32' },
         { id: 'm-06', channelId: 'ch-1', userId: 'u-nikol', text: 'moze byyyt 😍', time: 'piatok 09:33' },
@@ -149,6 +185,14 @@ export default defineComponent({
         text: 'staršia správa',
         time: 'štvrtok 16:20'
       })
+    },
+
+    isMention(text: string): boolean {
+      const me = this.usersById[this.meId]
+      if (!me) return false
+      const normalized = me.name.trim().toLowerCase()
+      const regex = new RegExp(`@${normalized}\\b`, 'i')
+      return regex.test(text)
     }
   }
 })
@@ -157,12 +201,12 @@ export default defineComponent({
 <style scoped>
 
 .typing-bar {
-    position: sticky;
-    bottom: 0;
-    color: rgb(0, 0, 0, 0.7);
-    width: 100%;
-    cursor: pointer;
-    text-align: left;
+  position: sticky;
+  bottom: 0;
+  color: rgb(0, 0, 0, 0.7);
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
 }
 
 </style>

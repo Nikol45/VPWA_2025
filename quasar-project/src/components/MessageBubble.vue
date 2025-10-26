@@ -1,8 +1,11 @@
 <template>
     <div v-if="!isMine" class="row items-end q-gutter-sm">
-        <q-avatar size="28px">
-            <img :src="user?.avatar ?? ''" alt="" />
-        </q-avatar>
+        <div class="relative-position">
+            <q-avatar size="28px">
+                <img :src="user?.avatar ?? ''" alt="" />
+            </q-avatar>
+            <q-icon name="circle" bordered size="8px" :color="statusColor" class="absolute-bottom-right"/>
+        </div>
 
         <div>
             <div class="q-mt-md row items-center no-wrap">
@@ -23,6 +26,7 @@
         </div>
     </div>
 </template>
+<!-- Ano, vieme, ze existuje quasar komponent chat-message ale nepacil sa nam jeho dizajn, tak sme si vytvorili vlastny :D -->
 
 <script lang="ts">
 import { defineComponent } from 'vue'
@@ -40,6 +44,7 @@ interface User {
     id: string
     name: string
     avatar: string
+    status: string
 }
 
 export default defineComponent({
@@ -60,7 +65,19 @@ export default defineComponent({
             type: Boolean,
             default: false
         }
-    }
+    },
+
+    computed: {
+        statusColor(): string {
+            if (!this.user) return 'grey'
+            switch (this.user.status) {
+                case 'online': return 'positive'
+                case 'dnd': return 'negative'
+                case 'offline': return 'grey'
+                default: return 'grey'
+            }
+        }
+    },
 })
 </script>
 
@@ -75,6 +92,14 @@ export default defineComponent({
         word-break: break-word;
     }
 
-    .bubble.their { background: #fff; color: #1f1f1f; }
-    .bubble.mine  { background: var(--c-2); color: #fff; margin-left: auto; }
+    .bubble.their { background: #fff; color: var(--c-5); }
+    .bubble.mine  { background: var(--c-2); color: var(--c-5); margin-left: auto; }
+
+    .mention .bubble {
+      background-color: rgba(255, 215, 0, 0.25);
+      box-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
+      border: 2px rgba(255, 215, 0, 0.6);
+      border-style: dotted;
+    }
+
 </style>

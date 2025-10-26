@@ -6,7 +6,7 @@
             </template>
         </q-input>
         <q-menu ref="cmdMenu" :target="cmdTarget" :no-focus="true" v-model="showMenu" v-show="filteredSuggestions.length && showMenu" anchor="bottom left" self="top left">
-            <q-list class="sugegstion c-2 text-c-3">
+            <q-list class="suggestion c-2 text-c-3">
                 <q-item class="c-2 text-c-3" v-for="item in filteredSuggestions" :key="item" clickable @click="selectSuggestion(item)">
                     <q-item-section class="c-2 text-c-3">{{ item }}</q-item-section>
                 </q-item>
@@ -21,11 +21,7 @@
 <script lang="ts">
     import { defineComponent, nextTick, type PropType} from 'vue'
     import type { QInput, QMenu } from 'quasar'
-
-    interface Member {
-        id: number
-        nickname: string
-    }
+    import type { Member } from 'src/types/common.ts'
 
     interface Channel {
         id: string
@@ -49,6 +45,11 @@
                 type: Object as PropType<Record<string, Member[]>>,
                 required: false,
                 default: () => ({})
+            },
+
+            currentUser: {
+                type: Object as PropType<Member | null>,
+                default: null
             }
         },
 
@@ -90,12 +91,45 @@
         },
 
         computed: {
+
+            availableCommands(): string[] {
+                const channel = this.activeChannel
+                const user = this.currentUser
+
+                const base = ['/join']
+
+                if (!channel || !user) return base
+
+                if (channel) {
+                    base.push('/list', '/cancel')
+                }
+
+                const members = this.membersByChannel[channel.id] || []
+                const current = members.find(m => m.nickname === user.nickname)
+                const isAdmin = current?.role === 'admin'
+                const isPrivate = channel.private
+
+                if (!isPrivate) {
+                    base.push('/invite', '/kick')
+                }
+
+                if (isPrivate && isAdmin) {
+                    base.push('/invite', '/revoke', '/kick')
+                }
+
+                if (isAdmin) {
+                    base.push('/quit')
+                }
+
+                return base
+            },
+
             filteredSuggestions(): string[] {
                 const text = this.msg
 
                 if (text.startsWith('/')) {
                     const input = text.slice(1).toLowerCase()
-                    return this.commands.filter(cmd => cmd.startsWith('/' + input))
+                    return this.availableCommands.filter(cmd => cmd.startsWith('/' + input))
                 }
 
                 if (text.startsWith('@') && this.activeChannel && this.membersByChannel) {
