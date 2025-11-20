@@ -19,10 +19,14 @@
     },
 
     methods: {
-      async handleLogin() {
-        if (this.$route.name !== 'home') {
-          await this.$router.replace({ name: 'home' })
-        }
+      async handleLogin(formData : Record<string, string>) {
+        console.log("Received login data:", formData)
+        const res = await fetch('http://localhost:3333/test-user')
+        const data = await res.json()
+
+        console.log("User from server:", data)
+
+        await this.$router.replace({ name: 'home' })
       }
     }
   })
