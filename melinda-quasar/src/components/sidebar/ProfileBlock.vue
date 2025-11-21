@@ -20,7 +20,7 @@
                 <template v-if="!user.role">
                     <template v-for="(btn, index) in filteredButtons" :key="index">
                         <q-btn v-if="btn.action === 'notify'" flat round dense :icon="btn.icon" color="c-1" ref="notifBtn">
-                            <q-menu anchor="bottom right" self="top right" transition-show="jump-down" transition-hide="jump-up" class="shadow-3 c-2 text-c-5 rad-15">
+                            <q-menu anchor="bottom right" self="top right" transition-show="jump-down" transition-hide="jump-up" class="shadow-3 c-2 text-c-5 rad-15 q-py-sm">
                                 <div class="q-pa-sm notif">
                                     <q-list>
                                         <q-item v-for="n in notifications" :key="n.id" clickable class="rad-15">
@@ -93,10 +93,10 @@
         data() {
             return {
                 notifications: [
-                { id: 1, title: 'Nikol', text: 'Created voting to kick you from channel Ženy na FIIT', avatar: '/avatars/users/nikol.png' },
-                { id: 2, title: 'Simča', text: 'Voted to kick you out of Ženy na FIIT (2/3)', avatar: '/avatars/users/simca.png' },
-                { id: 3, title: 'Firefly x3', text: 'You were invited to channel FIIT STU', avatar: '/avatars/users/firefly.jpg' },
-                { id: 4, title: 'Share & Care', text: 'Warning: channel Share & Care will be closed in 3 days', avatar: '/avatars/channels/cerveny.png' }
+                    { id: 1, title: 'Nikol', text: 'Created voting to kick you from channel Ženy na FIIT', avatar: '/avatars/users/nikol.png' },
+                    { id: 2, title: 'Simča', text: 'Voted to kick you out of Ženy na FIIT (2/3)', avatar: '/avatars/users/simca.png' },
+                    { id: 3, title: 'Firefly x3', text: 'You were invited to channel FIIT STU', avatar: '/avatars/users/firefly.jpg' },
+                    { id: 4, title: 'Share & Care', text: 'Warning: channel Share & Care will be closed in 3 days', avatar: '/avatars/channels/cerveny.png' }
                 ]
             }
         },

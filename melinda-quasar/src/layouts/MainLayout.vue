@@ -1,7 +1,17 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header class="c-3 text-c-1">
-      <q-toolbar v-if="activeChannel">
+    <q-header :class="isSettingsRoute ? 'c-4 text-c-1' : 'c-4 text-c-1'">
+      <!-- SETTINGS -->
+      <q-toolbar v-if="isSettingsRoute">
+        <q-btn flat round dense icon="arrow_back" class="q-mr-sm" @click="goBackToChannel" />
+        <div class="row items-center">
+          <p class="text-h5 text-weight-bolder text-c-1 q-mb-none">Channel settings</p>
+        </div>
+        <q-space/>
+      </q-toolbar>
+
+      <!-- NORMAL -->
+      <q-toolbar v-else-if="activeChannel">
         <q-btn flat round dense icon="arrow_back" class="q-mr-sm" @click="goHome" />
         <q-avatar size="28px" class="q-mr-sm">
           <img :src="activeChannel!.avatar" :alt="activeChannel!.name" />
@@ -12,7 +22,7 @@
         <q-space />
 
         <q-btn v-if="activeChannel"
-          flat round dense icon="group" class="q-mr-xs"
+               flat round dense icon="group" class="q-mr-xs"
                aria-label="Toggle members" @click="toggleMembers"/>
 
         <q-btn flat round dense icon="info" :to="{ name: 'channel-settings' }" />
@@ -20,6 +30,7 @@
 
       <q-toolbar v-else />
     </q-header>
+
 
     <q-drawer
       v-if="!isCompact || $route.name === 'home'"
@@ -39,6 +50,8 @@
               :key="c.id"
               :channel="c"
               @click="goToChannel"
+              @accept="acceptInvite"
+              @decline="declineInvite"
             ></channel-block>
           </q-list>
         </q-scroll-area>
@@ -51,12 +64,19 @@
     </q-drawer>
 
     <q-page-container class="c-1">
-      <router-view />
+      <router-view v-if="isSettingsRoute" :current-user="user" />
+      <router-view v-else />
     </q-page-container>
 
+
     <q-footer class="c-3 text-c-1 q-pa-md">
+      <!-- SETTINGS - len príkazy -->
+      <command-line v-if="isSettingsRoute" :current-user="user" @command="handleCommand" />
+
+      <!-- NORMAL - aj chat -->
       <command-line :current-user="user" :active-channel="activeChannel" :membersByChannel="membersByChannel" @command="handleCommand" @message="handleMessage" @mention="handleMention"></command-line>
     </q-footer>
+
   </q-layout>
 
   <SelectPopup
@@ -141,6 +161,7 @@ interface Channel {
   private: boolean
   avatar: string
   invited: boolean
+  lastMessageAt?: number
 }
 
 export default defineComponent({
@@ -276,7 +297,21 @@ export default defineComponent({
 
     filtered(): Channel[] {
       const s = this.search.trim().toLowerCase()
-      return this.channels.filter(c => this.filter === 'all' ||(this.filter === 'public' && !c.private) || (this.filter === 'private' && c.private)).filter(c => (s ? c.name.toLowerCase().includes(s) : true))
+
+      const base = this.channels
+        .filter(c =>
+          this.filter === 'all' ||
+          (this.filter === 'public' && !c.private) ||
+          (this.filter === 'private' && c.private)
+        )
+        .filter(c => (s ? c.name.toLowerCase().includes(s) : true))
+
+      const invited = base.filter(c => c.invited)
+      const normal = base.filter(c => !c.invited)
+
+      normal.sort((a, b) => (b.lastMessageAt ?? 0) - (a.lastMessageAt ?? 0))
+
+      return [...invited, ...normal]
     },
 
     activeChannel(): Channel | null {
@@ -288,7 +323,12 @@ export default defineComponent({
     activeMembers(): Member[] {
       const id = this.$route.params.id as string | undefined
       return id ? (this.membersByChannel[id] || []) : []
+    },
+
+    isSettingsRoute(): boolean {
+      return this.$route.path.startsWith('/home/settings')
     }
+
   },
 
   watch: {
@@ -367,11 +407,16 @@ export default defineComponent({
     },
 
     goToChannel(c: Channel) {
-      if (c.invited) {
-        c.invited = false
-      }
       if (this.$route.params.id === c.id) return
       void this.$router.push({ name: 'channel', params: { id: c.id } })
+    },
+
+    acceptInvite(c: Channel) {
+      c.invited = false
+    },
+
+    declineInvite(c: Channel) {
+      this.channels = this.channels.filter(ch => ch.id !== c.id)
     },
 
     handleMessage() {
@@ -381,13 +426,22 @@ export default defineComponent({
 
     },
 
+    goBackToChannel() {
+      const id = this.$route.params.id
+      if (id) {
+        void this.$router.push({ name: 'channel', params: { id } })
+      } else {
+        void this.$router.back()
+      }
+    },
+
     goHome() {
       void this.$router.push({ name: 'home' })
     },
 
     handleProfileAction(action: string) {
       switch (action) {
-        case 'settings': 
+        case 'settings':
           void this.$router.push({ name: 'profile-settings' });
           break
         case 'notify':
@@ -397,6 +451,20 @@ export default defineComponent({
     },
 
     handleCommand({ command, args }: { command: string, args: string[] }) {
+      if (this.isSettingsRoute) {
+        if (!command.startsWith('/')) return
+
+        const name = command.slice(1)
+        switch (name) {
+          case 'list':
+            this.toggleMembers()
+            break
+          default:
+            console.log('Unknown settings command:', name, args)
+        }
+        return
+      }
+
       switch (command) {
         case 'list':
           if (this.activeChannel) {
@@ -407,6 +475,7 @@ export default defineComponent({
           console.log('Unknown command:', command, args)
       }
     },
+
 
     toggleMembers(){
       this.showMembers = !this.showMembers

@@ -1,6 +1,8 @@
 <template>
     <div class="row items-center full-width q-gutter-sm">
-        <q-input ref="cmdInput" dense standout="c-4" class="c-4 col q-ma-xxs" placeholder="Type a message or /command" v-model="msg" input-class="text-white" @keyup.enter="sendMessage">
+      <q-input ref="cmdInput" dense standout="c-4" class="c-4 col q-ma-xxs"
+               type="textarea" autogrow placeholder="Type a message or /command"
+               v-model="msg" input-class="text-white" @keydown.enter.exact.prevent="sendMessage" :maxlength="maxChars">
             <template v-if="activeChannel" #prepend>
                 <q-btn flat round dense class="text-c-1" icon="emoji_emotions" ref="emojiBtn"/>
                 <q-menu anchor="top left" self="bottom left" ref="emojiMenu" transition-show="jump-down" transition-hide="jump-up" class="rad-15 c-1" :offset="[0, 4]">
@@ -10,6 +12,11 @@
                         </q-btn>
                     </div>
                 </q-menu>
+            </template>
+            <template #append>
+              <div class="text-caption text-c-1 q-pr-xs">
+                {{ msg.length }}/{{ maxChars }}
+              </div>
             </template>
         </q-input>
         <q-menu ref="cmdMenu" :target="cmdTarget" :no-focus="true" v-model="showMenu" v-show="filteredSuggestions.length && showMenu" anchor="bottom left" self="top left">
@@ -64,6 +71,7 @@
             return {
                 showMenu: false,
                 msg:'',
+                maxChars: 2000,
                 commands: ['/list', '/join', '/invite', '/kick', '/cancel', '/revoke', '/quit'],
                 emojis: [
                     '😀','😁','😂','🤣','😊','😍','😎','😏','😢','😭','😡','🤔',
@@ -88,12 +96,12 @@
                     const [command, ...args] = text.substring(1).split(' ')
                     this.$emit('command', { command, args })
                 }
-                
+
                 else if (text.startsWith('@')) {
                     const [mention] = text.substring(1).split(' ')
                     this.$emit('mention', { mention })
                 }
-                
+
                 else {
                     this.$emit('message', text)
                 }
@@ -169,12 +177,18 @@
 
         watch: {
             msg (val: string) {
-                this.showMenu = (val.startsWith('/') || val.startsWith('@')) && this.filteredSuggestions.length > 0
-                void nextTick(() => {
-                    const menu = this.$refs.cmdMenu as QMenu | undefined
-                    menu?.updatePosition?.()
-                })
+              if (val.length > this.maxChars) {
+                this.msg = val.slice(0, this.maxChars)
+                return
+              }
+
+              this.showMenu = (val.startsWith('/') || val.startsWith('@')) && this.filteredSuggestions.length > 0
+              void nextTick(() => {
+                const menu = this.$refs.cmdMenu as QMenu | undefined
+                menu?.updatePosition?.()
+              })
             },
+
 
             filteredSuggestions () {
                 void nextTick(() => {
