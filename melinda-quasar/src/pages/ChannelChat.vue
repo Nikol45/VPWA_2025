@@ -1,14 +1,25 @@
 <template>
   <q-page class="c-1 q-px-sm column">
-    <q-scroll-area ref="scrollArea" style="height: calc(100vh - 108px);" class="no-scrollbar q-px-md q-pb-md q-gutter-md">
-      <q-infinite-scroll reverse @load="onInfiniteLoad" >
+    <q-scroll-area
+      ref="scrollArea"
+      style="height: calc(100vh - 108px);"
+      class="no-scrollbar q-px-md q-pb-md q-gutter-md"
+    >
+      <q-infinite-scroll reverse @load="onInfiniteLoad">
         <div v-for="m in messages" :key="m.id" class="row">
-          <message-bubble :message="m" :user="usersById[m.userId]" :is-mine="m.userId === meId" :class="{ mention: isMention(m.text) }"/>
+          <message-bubble
+            :message="m"
+            :user="usersById[m.userId]"
+            :is-mine="m.userId === meId"
+            :class="{ mention: isMention(m) }"
+          />
         </div>
 
-        <div v-if="typingBarText"
-             class="typing-bar text-caption c-1"
-             @click="openTypingPreview">
+        <div
+          v-if="typingBarText"
+          class="typing-bar text-caption c-1"
+          @click="openTypingPreview"
+        >
           {{ typingBarText }}
         </div>
 
@@ -36,11 +47,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch, nextTick } from 'vue'
-import { type QScrollArea, useQuasar } from 'quasar'
+import { defineComponent, nextTick } from 'vue'
+import type { QScrollArea } from 'quasar'
 import MessageBubble from 'src/components/MessageBubble.vue'
 import TypingPopup from 'src/components/popups/TypingPopup.vue'
 import TypingSelectPopup from 'src/components/popups/TypingSelectPopup.vue'
+
+import { useAuthStore } from 'src/stores/auth'
+import { messageService, typingService } from 'src/services'
+import type { Message as ApiMessage, TypingState, User as ApiUser } from 'src/contracts'
 
 interface Message {
   id: string
@@ -48,7 +63,10 @@ interface Message {
   userId: string
   text: string
   time: string
+  createdAt: string
+  mentions: number[]
 }
+
 
 interface User {
   id: string
@@ -68,193 +86,321 @@ export default defineComponent({
   components: { MessageBubble, TypingPopup, TypingSelectPopup },
 
   setup() {
-    const $q = useQuasar()
-
-    if ('Notification' in window && Notification.permission === 'denied') {
-      void Notification.requestPermission()
-    }
-
-    const showSystemNotification = () => {
-      if (!('Notification' in window)) {
-        console.warn('Browser does not support system notifications.')
-        return
-      }
-
-      if (Notification.permission === 'granted') {
-        new Notification('Nikol', {
-          body: 'Ste niekto na fakulte?',
-          icon: '/avatars/users/nikol.png',
-          badge: '/avatars/users/nikol.png',
-        })
-      }
-    }
-
-    watch(
-      () => $q.appVisible,
-      (val) => {
-        if (val === false) {
-          showSystemNotification()
-        }
-      }
-    )
-
-    return { showSystemNotification }
+    const authStore = useAuthStore()
+    return { authStore }
   },
 
   data() {
     return {
-      meId: 'u-me',
+      messages: [] as Message[],
+      usersById: {} as Record<string, User>,
 
-      usersById: {
-        'u-nikol': { id: 'u-nikol', name: 'Nikol',  avatar: '/avatars/users/nikol.png', status: 'online' },
-        'u-simca': { id: 'u-simca', name: 'Simča',  avatar: '/avatars/users/simca.png', status: 'dnd' },
-        'u-me':    { id: 'u-me',    name: 'Firefly',     avatar: '/avatars/users/firefly.jpg', status: 'online' }
-      } as Record<string, User>,
-
-      messages: [
-        { id: 'm-13', channelId: 'ch-1', userId: 'u-nikol', text: 'BFFR', time: 'štvrtok 22:03' },
-        { id: 'm-12', channelId: 'ch-1', userId: 'u-simca', text: 'Ta pome spinkať 💤', time: 'štvrtok 22:04' },
-        { id: 'm-11', channelId: 'ch-1', userId: 'u-simca', text: 'Good nighty 🌃', time: 'štvrtok 22:04' },
-        { id: 'm-10', channelId: 'ch-1', userId: 'u-me', text: 'bruuu noc prajem ženy 💫💎', time: 'štvrtok 22:05' },
-        { id: 'm-09', channelId: 'ch-1', userId: 'u-simca', text: 'Môže byť? @Firefly', time: 'piatok 09:31' },
-        { id: 'm-08', channelId: 'ch-1', userId: 'u-simca', text: 'poslala obrázok 🖼️', time: 'piatok 09:31' },
-        { id: 'm-07', channelId: 'ch-1', userId: 'u-simca', text: 'Nie je to too much?', time: 'piatok 09:32' },
-        { id: 'm-06', channelId: 'ch-1', userId: 'u-nikol', text: 'moze byyyt 😍', time: 'piatok 09:33' },
-        { id: 'm-05', channelId: 'ch-1', userId: 'u-simca', text: "It's out 😌", time: 'piatok 09:35' },
-        { id: 'm-04', channelId: 'ch-1', userId: 'u-nikol', text: 'aaa vyzerá to perfektne 🔥', time: 'piatok 09:36' },
-        { id: 'm-03', channelId: 'ch-1', userId: 'u-simca', text: 'yayy konečne hotovo 😮‍💨', time: 'piatok 09:36' },
-        { id: 'm-02', channelId: 'ch-1', userId: 'u-nikol', text: 'daj potom aj na story nech vidia 😎', time: 'piatok 09:37' },
-        { id: 'm-01', channelId: 'ch-1', userId: 'u-simca', text: 'maybeee 😏', time: 'piatok 09:38' },
-
-        { id: 'm1', channelId: 'ch-1', userId: 'u-nikol', text: 'ngl hento sa mi paci farebne', time: 'piatok 14:53' },
-        { id: 'm2', channelId: 'ch-1', userId: 'u-me',    text: 'tomu ver',                      time: '10:59' },
-        { id: 'm3', channelId: 'ch-1', userId: 'u-nikol', text: 'idem si spravit nechty nejake pekne jesenne muhehehe', time: '10:59' },
-        { id: 'm4', channelId: 'ch-1', userId: 'u-simca', text: 'uuu potom pošli 💅💅',          time: '11:01' },
-        { id: 'm5', channelId: 'ch-1', userId: 'u-me',    text: '💅',                            time: '11:02' },
-        { id: 'm6', channelId: 'ch-1', userId: 'u-nikol', text: '💅',                            time: '11:05' },
-        { id: 'm7', channelId: 'ch-1', userId: 'u-me',    text: '💅',                            time: '11:07' }
-      ] as Message[],
-
-      typingUserIds: [] as string[],
-
+      typingStates: [] as TypingState[],
+      typingAuthorId: null as number | null,
       showTyping: false,
-
-      typingAuthorId: 'u-nikol',
-
-      typingByUser: {
-        'u-nikol':
-          'Ináč rn som si všimla, že ani dis nemá dobre spravené tie guličky statusu, ten outline neni vy',
-
-        'u-simca':
-          'podľa mňa by sme to mali'
-      } as Record<string, string>,
-
       showTypingSelect: false,
       typingSelectOptions: [] as TypingOption[],
 
-      loadTimer: null as number | null
+      hasMore: true,
+      loadingMore: false,
+      initialLoaded: false,
+
+      typingPollTimer: null as number | null,
     }
   },
 
   computed: {
-    
+    meId(): string | null {
+      const u = this.authStore.user
+      return u ? String(u.id) : null
+    },
+
+    currentChannelId(): number | null {
+      const idStr = this.$route.params.id as string | undefined
+      if (!idStr) return null
+      const id = Number(idStr)
+      return Number.isFinite(id) ? id : null
+    },
+
     typingBarText(): string | null {
-      if (this.typingUserIds.length === 0) return null
-      const names = this.typingUserIds.map(id => this.usersById[id]?.name).filter(Boolean) as string[]
+      if (this.typingStates.length === 0) return null
+
+      const names = this.typingStates
+        .map((s) => this.usersById[String(s.userId)]?.name ?? s.nickname)
+        .filter(Boolean)
+
       if (names.length === 0) return null
+
       const verb = names.length > 1 ? 'píšu…' : 'píše…'
       return `${names.join(', ')} ${verb}`
     },
 
     typingAuthorName(): string {
-      return this.usersById[this.typingAuthorId]?.name ?? 'User'
+      let id = this.typingAuthorId
+
+      if (id == null) {
+        const first = this.typingStates[0]
+        if (first) id = first.userId
+      }
+
+      if (id == null) return 'User'
+
+      const user = this.usersById[String(id)]
+      if (user) return user.name
+
+      const state = this.typingStates.find((s) => s.userId === id)
+      return state?.nickname ?? 'User'
     },
 
     activeTypingText(): string {
-      return this.typingByUser[this.typingAuthorId] ?? ''
-    }
+      let id = this.typingAuthorId
+
+      if (id == null) {
+        const first = this.typingStates[0]
+        if (first) id = first.userId
+      }
+
+      if (id == null) return ''
+
+      const state = this.typingStates.find((s) => s.userId === id)
+      return state?.text ?? ''
+    },
   },
 
-  mounted() {
-    this.startTyping('u-nikol')
-    this.startTyping('u-simca')
-    void nextTick(() => this.scrollToBottom())
+  watch: {
+    '$route.params.id': {
+      immediate: true,
+      handler() {
+        void this.onChannelChanged()
+      },
+    },
+  },
+
+  beforeUnmount() {
+    this.stopTypingPolling()
   },
 
   methods: {
-    onTypingBack(){
+    async onChannelChanged() {
+      this.messages = []
+      this.typingStates = []
+      this.hasMore = true
+      this.initialLoaded = false
+
+      await this.loadInitialMessages()
+      this.startTypingPolling()
+    },
+
+    mapApiMessage(m: ApiMessage): Message {
+      return {
+        id: String(m.id),
+        channelId: String(m.channelId),
+        userId: String(m.userId),
+        text: m.text,
+        time: new Date(m.createdAt).toLocaleTimeString('sk-SK', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        createdAt: m.createdAt,
+        mentions: Array.isArray(m.mentions) ? m.mentions : [],
+      }
+    },
+
+    async loadInitialMessages() {
+      const channelId = this.currentChannelId
+      if (!channelId) return
+
+      this.loadingMore = true
+      const limit = 20
+
+      try {
+        const fetched = await messageService.list(channelId, { limit })
+        if (fetched.length < limit) {
+          this.hasMore = false
+        }
+
+        const ascApi = [...fetched].reverse()
+        this.messages = ascApi.map((m) => this.mapApiMessage(m))
+
+        for (const m of ascApi) {
+          if (m.user) this.ensureUser(m.user)
+        }
+
+        this.initialLoaded = true
+        await nextTick()
+        this.scrollToBottom()
+      } finally {
+        this.loadingMore = false
+      }
+    },
+
+    async onInfiniteLoad(index: number, done: (stop?: boolean) => void) {
+      if (this.loadingMore || !this.hasMore) {
+        done(true)
+        return
+      }
+
+      const channelId = this.currentChannelId
+      if (!channelId) {
+        done(true)
+        return
+      }
+
+      const oldest = this.messages[0]
+      if (!oldest) {
+        done(true)
+        return
+      }
+
+      this.loadingMore = true
+      const limit = 20
+
+      try {
+        const fetched = await messageService.list(channelId, {
+          before: this.findCreatedAtForMessage(oldest.id) ?? null,
+          limit,
+        })
+
+        if (fetched.length === 0) {
+          this.hasMore = false
+          done(true)
+          return
+        }
+
+        if (fetched.length < limit) {
+          this.hasMore = false
+        }
+
+        const ascApi = [...fetched].reverse()
+        const mapped = ascApi.map((m) => this.mapApiMessage(m))
+        this.messages = [...mapped, ...this.messages]
+
+        for (const m of ascApi) {
+          if (m.user) this.ensureUser(m.user)
+        }
+
+        done()
+      } catch {
+        done(true)
+      } finally {
+        this.loadingMore = false
+      }
+    },
+
+    findCreatedAtForMessage(messageId: string): string | null {
+      const msg = this.messages.find((m) => m.id === messageId)
+      if (!msg) return null
+      return null
+    },
+
+    ensureUser(user: ApiUser) {
+      const key = String(user.id)
+      if (this.usersById[key]) return
+
+      this.usersById[key] = {
+        id: key,
+        name: user.nickname,
+        avatar: user.avatarUrl || '/avatars/users/default.png',
+        status: user.status,
+      }
+    },
+
+    scrollToBottom() {
+      const scroll = this.$refs.scrollArea as QScrollArea | undefined
+      scroll?.setScrollPercentage('vertical', 1)
+    },
+
+    isMention(message: Message): boolean {
+      const me = this.authStore.user
+      if (!me) return false
+      return message.mentions.includes(me.id)
+    },
+
+    onTypingBack() {
       this.showTyping = false
       this.showTypingSelect = true
     },
 
     openTypingPreview() {
-      const ids = this.typingUserIds.filter(id => this.usersById[id])
-      const first = ids[0] ?? null
+      if (this.typingStates.length === 0) return
+
+      const ids = this.typingStates.map((s) => s.userId)
 
       if (ids.length <= 1) {
-        if (first) this.typingAuthorId = first
-        this.showTyping = !!first
+        const first = ids[0]
+        if (first != null) {
+          this.typingAuthorId = first
+          this.showTyping = true
+        }
         return
       }
 
-      this.typingSelectOptions = ids.map(id => {
-        const u = this.usersById[id]
-        return { id, label: u?.name ?? id, ...(u?.avatar ? { avatar: u.avatar } : {}) }
+      this.typingSelectOptions = this.typingStates.map((s) => {
+        const u = this.usersById[String(s.userId)]
+        return {
+          id: String(s.userId),
+          label: u?.name ?? s.nickname,
+          ...(u?.avatar ? { avatar: u.avatar } : {}),
+        }
       })
-      void nextTick(() => { this.showTypingSelect = true })
+
+      this.showTypingSelect = true
     },
 
     onTypingSelect(id: string) {
-      this.typingAuthorId = id
+      const numId = Number(id)
+      if (!Number.isFinite(numId)) return
+      this.typingAuthorId = numId
       this.showTyping = true
       this.showTypingSelect = false
     },
 
-    scrollToBottom() {
-      const scroll = this.$refs.scrollArea as QScrollArea | undefined
-      scroll?.setScrollPercentage('vertical', 10)
+    startTypingPolling() {
+      this.stopTypingPolling()
+
+      const channelId = this.currentChannelId
+      if (!channelId) return
+
+      void this.fetchTypingStates()
+
+      this.typingPollTimer = window.setInterval(() => {
+        void this.fetchTypingStates()
+      }, 3000)
     },
 
-    onInfiniteLoad(index: number, done: (stop?: boolean) => void) {
-      if (this.loadTimer) {
-        clearTimeout(this.loadTimer)
-        this.loadTimer = null
+    stopTypingPolling() {
+      if (this.typingPollTimer !== null) {
+        clearInterval(this.typingPollTimer)
+        this.typingPollTimer = null
       }
-      this.loadTimer = window.setTimeout(() => {
-        this.loadOlderBatch(5)
-        done()
-        this.loadTimer = null
-      }, 2000)
     },
 
-    loadOlderBatch(count: number) {
-      const now = Date.now()
-      const older = Array.from({ length: count }, (_, i) => ({
-        id: `older-${now - i}`,
-        channelId: 'ch-1',
-        userId: 'u-simca',
-        text: `staršia správa #${i + 1}`,
-        time: 'štvrtok 16:20'
-      }))
-      this.messages.unshift(...older)
-    },
+    async fetchTypingStates() {
+      const channelId = this.currentChannelId
+      if (!channelId) return
 
-    startTyping(userId: string) {
-      this.typingUserIds = [...new Set([...this.typingUserIds, userId])]
-    },
+      const states = await typingService.listTyping(channelId)
+      this.typingStates = states
 
-    stopTyping(userId: string) {
-      this.typingUserIds = this.typingUserIds.filter(id => id !== userId)
-    },
+      for (const s of states) {
+        const key = String(s.userId)
+        if (!this.usersById[key]) {
+          this.usersById[key] = {
+            id: key,
+            name: s.nickname,
+            avatar: '/avatars/users/default.png',
+            status: 'online',
+          }
+        }
+      }
 
-    isMention(text: string): boolean {
-      const me = this.usersById[this.meId]
-      if (!me) return false
-      const normalized = me.name.trim().toLowerCase()
-      const regex = new RegExp(`@${normalized}\\b`, 'i')
-      return regex.test(text)
-    }
-  }
+      if (this.typingStates.length === 0) {
+        this.showTyping = false
+        this.showTypingSelect = false
+        this.typingAuthorId = null
+      }
+    },
+  },
 })
 </script>
 

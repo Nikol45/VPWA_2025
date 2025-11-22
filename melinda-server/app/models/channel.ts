@@ -10,7 +10,7 @@ export default class Channel extends BaseModel {
   declare id: number
 
   @column()
-  declare name: string;
+  declare name: string
 
   @column()
   declare iconUrl: string
@@ -62,6 +62,9 @@ export default class Channel extends BaseModel {
     pivotTimestamps: true,
   })
   declare blacklist: ManyToMany<typeof User>
+
+  @column()
+  declare inviteCode: string
 
   @column.dateTime()
   declare lastMessageAt: DateTime | null

@@ -11,6 +11,7 @@ export default class Channels extends BaseSchema {
       table.enum('visibility', ['public', 'private']).notNullable().defaultTo('public')
       table.integer('n_members').notNullable().defaultTo(0)
       table.integer('admin_id').notNullable().references('id').inTable('users').onDelete('CASCADE')
+      table.string('invite_code', 8).notNullable().unique()
       table.timestamp('last_message_at', { useTz: true }).nullable()
       table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
       table.timestamp('updated_at', { useTz: true }).defaultTo(this.now())

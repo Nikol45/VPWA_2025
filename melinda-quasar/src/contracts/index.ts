@@ -1,1 +1,6 @@
 export * from './Auth'
+export * from './Channel'
+export * from './Message'
+export * from './Notification'
+export * from './ChannelMember'
+export * from './Typing'

@@ -1,16 +1,14 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header :class="isSettingsRoute ? 'c-4 text-c-1' : 'c-4 text-c-1'">
-      <!-- SETTINGS -->
       <q-toolbar v-if="isSettingsRoute">
         <q-btn flat round dense icon="arrow_back" class="q-mr-sm" @click="goBackToChannel" />
         <div class="row items-center">
           <p class="text-h5 text-weight-bolder text-c-1 q-mb-none">Channel settings</p>
         </div>
-        <q-space/>
+        <q-space />
       </q-toolbar>
 
-      <!-- NORMAL -->
       <q-toolbar v-else-if="activeChannel">
         <q-btn flat round dense icon="arrow_back" class="q-mr-sm" @click="goHome" />
         <q-avatar size="28px" class="q-mr-sm">
@@ -21,9 +19,16 @@
         </div>
         <q-space />
 
-        <q-btn v-if="activeChannel"
-               flat round dense icon="group" class="q-mr-xs"
-               aria-label="Toggle members" @click="toggleMembers"/>
+        <q-btn
+          v-if="activeChannel"
+          flat
+          round
+          dense
+          icon="group"
+          class="q-mr-xs"
+          aria-label="Toggle members"
+          @click="toggleMembers"
+        />
 
         <q-btn flat round dense icon="info" :to="{ name: 'channel-settings' }" />
       </q-toolbar>
@@ -31,17 +36,23 @@
       <q-toolbar v-else />
     </q-header>
 
-
     <q-drawer
       v-if="!isCompact || $route.name === 'home'"
-      v-model="leftOpen" side="left"  behavior="desktop"
+      v-model="leftOpen"
+      side="left"
+      behavior="desktop"
       :width="isCompact ? $q.screen.width : 300"
-      :overlay="isCompact" class="c-4 text-c-1 sidebar relative-position"
+      :overlay="isCompact"
+      class="c-4 text-c-1 sidebar relative-position"
     >
       <div class="column fit">
-        <profile-block :user="user" @action="handleProfileAction"></profile-block>
+        <profile-block :user="user" @action="handleProfileAction" />
 
-        <search-filter v-model:filter="filter" v-model="search" class = "responsive-padding"></search-filter>
+        <search-filter
+          v-model:filter="filter"
+          v-model="search"
+          class="responsive-padding"
+        />
 
         <q-scroll-area class="col">
           <q-list class="q-py-sm responsive-padding">
@@ -52,13 +63,17 @@
               @click="goToChannel"
               @accept="acceptInvite"
               @decline="declineInvite"
-            ></channel-block>
+            />
           </q-list>
         </q-scroll-area>
 
-        <q-btn v-if="$route.name !== 'home' || $q.screen.lt.sm"
+        <q-btn
+          v-if="$route.name !== 'home' || $q.screen.lt.sm"
           class="c-3 text-c-1 op-95 floating-add"
-          round icon="add" size="22px" @click="createChannel"
+          round
+          icon="add"
+          size="22px"
+          @click="createChannel"
         />
       </div>
     </q-drawer>
@@ -68,15 +83,22 @@
       <router-view v-else />
     </q-page-container>
 
-
     <q-footer class="c-3 text-c-1 q-pa-md">
-      <!-- SETTINGS - len príkazy -->
-      <command-line v-if="isSettingsRoute" :current-user="user" @command="handleCommand" />
-
-      <!-- NORMAL - aj chat -->
-      <command-line :current-user="user" :active-channel="activeChannel" :membersByChannel="membersByChannel" @command="handleCommand" @message="handleMessage" @mention="handleMention"></command-line>
+      <command-line
+        v-if="isSettingsRoute"
+        :current-user="user"
+        @command="handleCommand"
+      />
+      <command-line
+        v-else
+        :current-user="user"
+        :active-channel="activeChannel"
+        :membersByChannel="membersByChannel"
+        @command="handleCommand"
+        @message="handleMessage"
+        @mention="handleMention"
+      />
     </q-footer>
-
   </q-layout>
 
   <SelectPopup
@@ -125,7 +147,7 @@ import ChannelBlock from 'src/components/sidebar/ChannelBlock.vue'
 
 import SelectPopup from 'src/components/popups/SelectPopup.vue'
 import CreatePopup from 'src/components/popups/CreatePopup.vue'
-import JoinPopup   from 'src/components/popups/JoinPopup.vue'
+import JoinPopup from 'src/components/popups/JoinPopup.vue'
 import SearchPopup from 'src/components/popups/SearchPopup.vue'
 
 import MembersPopup from 'src/components/popups/MembersPopup.vue'
@@ -134,6 +156,11 @@ import type { Member } from 'src/types/common.ts'
 import 'vue-router'
 import type { Router, RouteLocationNormalizedLoaded } from 'vue-router'
 import type { QVueGlobals } from 'quasar'
+import { useChannelsStore } from 'src/stores/channels'
+import { useAuthStore } from 'src/stores/auth'
+import type { User as ApiUser } from 'src/contracts'
+import type { ChannelVisibility } from 'src/contracts'
+import { channelService } from 'src/services'
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -161,13 +188,37 @@ interface Channel {
   private: boolean
   avatar: string
   invited: boolean
-  lastMessageAt?: number
+  lastMessageAt?: number | undefined
+}
+
+interface CreateChannelPayload {
+  name: string
+  visibility: ChannelVisibility
+  iconUrl?: string
 }
 
 export default defineComponent({
   name: 'HomeLayout',
-  components: { CommandLine, ProfileBlock, SearchFilter, ChannelBlock,
-    SelectPopup, CreatePopup, JoinPopup, SearchPopup, MembersPopup
+  components: {
+    CommandLine,
+    ProfileBlock,
+    SearchFilter,
+    ChannelBlock,
+    SelectPopup,
+    CreatePopup,
+    JoinPopup,
+    SearchPopup,
+    MembersPopup,
+  },
+
+  setup() {
+    const channelsStore = useChannelsStore()
+    const authStore = useAuthStore()
+
+    return {
+      channelsStore,
+      authStore,
+    }
   },
 
   data() {
@@ -175,139 +226,73 @@ export default defineComponent({
       leftOpen: true,
       search: '',
       filter: 'all' as Visibility,
-      msg: '',
-
-      user: {
-        id: 1,
-        nickname: 'FireFly x3',
-        name: 'Svetlana Pivarčiová',
-        avatarUrl: '/avatars/users/firefly.jpg',
-        status: 'online',
-        role: ''
-      } as User,
-
-      channels: [
-        { id: '1',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png',       invited: true},
-        { id: '2',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png',       invited: false},
-        { id: '3',  name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png',  invited: false},
-        { id: '4',  name: 'Share & Care',        members: 27,   private: true,  avatar: '/avatars/channels/cerveny.png',    invited: false},
-        { id: '5',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png',       invited: false},
-        { id: '6',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png',       invited: false},
-        { id: '7',  name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png',  invited: false},
-        { id: '8',  name: 'FIIT STU',            members: 1216, private: false, avatar: '/avatars/channels/FIIT.png',       invited: false},
-        { id: '9',  name: 'Ženy na FIIT',        members: 3,    private: true,  avatar: '/avatars/channels/zeny.png',       invited: false},
-        { id: '10', name: 'Študenti Fiit 3. r.', members: 621,  private: false, avatar: '/avatars/channels/tretiacky.png',  invited: false},
-        { id: '11', name: 'Share & Care',        members: 27,   private: true,  avatar: '/avatars/channels/cerveny.png',    invited: false}
-      ] as Channel[],
 
       showSelect: false,
       showCreate: false,
-      showJoin:   false,
+      showJoin: false,
       showSearch: false,
       showMembers: false,
 
-      membersByChannel: {
-        '1': [
-          { id: 1, nickname: 'FireFly x3', name: 'Svetlana Pivarčiová', avatarUrl: '/avatars/users/firefly.jpg', role: 'admin', status: 'online' },
-          { id: 2, nickname: 'Nikol', name: 'Nikol Maljarová', avatarUrl: '/avatars/users/nikol.png', status: 'online' },
-          { id: 3, nickname: 'Simča', name: 'Simona Ričovská', avatarUrl: '/avatars/users/simca.png', status: 'offline' },
-          { id: 4, nickname: 'Peťo', name: 'Peter Ďurčo', avatarUrl: '/avatars/users/peto.png', status: 'dnd' },
-          { id: 5, nickname: 'Betka', name: 'Betka Zat', avatarUrl: '/avatars/users/betka.png', status: 'dnd' }
-        ],
-        '2': [
-          { id: 1, nickname: 'Firefly', name: 'Svetlana Pivarčiová', avatarUrl: '/avatars/users/firefly.jpg', role: 'admin', status: 'online' },
-          { id: 2, nickname: 'Nikol', name: 'Nikol Maljarová', avatarUrl: '/avatars/users/nikol.png', status: 'away' },
-          { id: 3, nickname: 'Simi', name: 'Simona Ričovská', avatarUrl: '/avatars/users/simca.png', status: 'offline' },
-          { id: 4, nickname: 'Peto', name: 'Peter Ďurčo', avatarUrl: '/avatars/users/peto.png', status: 'dnd' },
-          { id: 5, nickname: 'Betty', name: 'Betka Zat', avatarUrl: '/avatars/users/betka.png', status: 'online' },
-          { id: 6, nickname: 'Luki', name: 'Lukáš Novák', avatarUrl: '/avatars/users/default.png', status: 'offline' },
-          { id: 7, nickname: 'Maro', name: 'Marek Kováč', avatarUrl: '/avatars/users/default.png', status: 'away' },
-          { id: 8, nickname: 'Janča', name: 'Jana Hrivnáková', avatarUrl: '/avatars/users/default.png', status: 'dnd' },
-          { id: 9, nickname: 'Tomino', name: 'Tomáš Blažek', avatarUrl: '/avatars/users/default.png', status: 'online' }
-        ],
-        '3': [
-          { id: 1, nickname: 'Ady', name: 'Adrián Holub', avatarUrl: '/avatars/users/default.png', role: 'admin', status: 'online' },
-          { id: 2, nickname: 'Zuzi', name: 'Zuzana Kmeťová', avatarUrl: '/avatars/users/default.png', status: 'away' },
-          { id: 3, nickname: 'Romo', name: 'Roman Šulc', avatarUrl: '/avatars/users/default.png', status: 'offline' },
-          { id: 4, nickname: 'Katka', name: 'Katarína Benková', avatarUrl: '/avatars/users/default.png', status: 'dnd' },
-          { id: 5, nickname: 'Dodo', name: 'Dominik Ondruš', avatarUrl: '/avatars/users/default.png', status: 'online' },
-          { id: 6, nickname: 'Miška', name: 'Michaela Králová', avatarUrl: '/avatars/users/default.png', status: 'away' },
-          { id: 7, nickname: 'Juro', name: 'Juraj Oravec', avatarUrl: '/avatars/users/default.png', status: 'offline' },
-          { id: 8, nickname: 'Viki', name: 'Viktor Lipnický', avatarUrl: '/avatars/users/default.png', status: 'online' },
-          { id: 9, nickname: 'Patres', name: 'Patrik Borovský', avatarUrl: '/avatars/users/default.png', status: 'dnd' },
-          { id: 10, nickname: 'Leny', name: 'Lenka Hrušková', avatarUrl: '/avatars/users/default.png', status: 'away' },
-          { id: 11, nickname: 'Stano', name: 'Stanislav Hrubý', avatarUrl: '/avatars/users/default.png', status: 'online' },
-          { id: 12, nickname: 'Evka', name: 'Eva Mihálová', avatarUrl: '/avatars/users/default.png', status: 'offline' },
-          { id: 13, nickname: 'Borka', name: 'Barbora Čechová', avatarUrl: '/avatars/users/default.png', status: 'online' },
-          { id: 14, nickname: 'Maťo', name: 'Martin Švec', avatarUrl: '/avatars/users/default.png', status: 'away' }
-        ],
-        '4': [
-          { id: 1, nickname: 'Táňa', name: 'Tatiana Gregorová', avatarUrl: '/avatars/users/default.png', role: 'admin', status: 'away' },
-          { id: 2, nickname: 'Boro', name: 'Boris Kajan', avatarUrl: '/avatars/users/default.png', status: 'online' },
-          { id: 3, nickname: 'Iva', name: 'Ivona Pavlíková', avatarUrl: '/avatars/users/default.png', status: 'offline' },
-          { id: 4, nickname: 'Rišo', name: 'Richard Valach', avatarUrl: '/avatars/users/default.png', status: 'dnd' },
-          { id: 5, nickname: 'Feri', name: 'František Šimko', avatarUrl: '/avatars/users/default.png', status: 'online' },
-          { id: 6, nickname: 'Naty', name: 'Natália Žideková', avatarUrl: '/avatars/users/default.png', status: 'away' },
-          { id: 7, nickname: 'Pali', name: 'Pavol Čierny', avatarUrl: '/avatars/users/default.png', status: 'offline' },
-          { id: 8, nickname: 'Sáruš', name: 'Sára Lednická', avatarUrl: '/avatars/users/default.png', status: 'online' }
-        ],
-        '5': [
-          { id: 1, nickname: 'FireFly x3', name: 'Svetlana Pivarčiová', avatarUrl: '/avatars/users/firefly.jpg', role: 'admin', status: 'online' },
-          { id: 2, nickname: 'Nikol', name: 'Nikol Maljarová', avatarUrl: '/avatars/users/nikol.png', status: 'online' },
-          { id: 3, nickname: 'Simča', name: 'Simona Ričovská', avatarUrl: '/avatars/users/simca.png', status: 'offline' }
-        ],
-        '6': [
-          { id: 1, nickname: 'FireFly x3', name: 'Svetlana Pivarčiová', avatarUrl: '/avatars/users/firefly.jpg', role: 'admin', status: 'online' },
-          { id: 2, nickname: 'Nikol', name: 'Nikol Maljarová', avatarUrl: '/avatars/users/nikol.png', status: 'online' },
-          { id: 3, nickname: 'Simča', name: 'Simona Ričovská', avatarUrl: '/avatars/users/simca.png', status: 'offline' }
-        ],
-        '7': [
-          { id: 1, nickname: 'FireFly x3', name: 'Svetlana Pivarčiová', avatarUrl: '/avatars/users/firefly.jpg', role: 'admin', status: 'online' },
-          { id: 2, nickname: 'Nikol', name: 'Nikol Maljarová', avatarUrl: '/avatars/users/nikol.png', status: 'online' },
-          { id: 3, nickname: 'Simča', name: 'Simona Ričovská', avatarUrl: '/avatars/users/simca.png', status: 'offline' }
-        ],
-        '8': [
-          { id: 1, nickname: 'FireFly x3', name: 'Svetlana Pivarčiová', avatarUrl: '/avatars/users/firefly.jpg', role: 'admin', status: 'online' },
-          { id: 2, nickname: 'Nikol', name: 'Nikol Maljarová', avatarUrl: '/avatars/users/nikol.png', status: 'online' },
-          { id: 3, nickname: 'Simča', name: 'Simona Ričovská', avatarUrl: '/avatars/users/simca.png', status: 'offline' }
-        ],
-        '9': [
-          { id: 1, nickname: 'FireFly x3', name: 'Svetlana Pivarčiová', avatarUrl: '/avatars/users/firefly.jpg', role: 'admin', status: 'online' },
-          { id: 2, nickname: 'Nikol', name: 'Nikol Maljarová', avatarUrl: '/avatars/users/nikol.png', status: 'online' },
-          { id: 3, nickname: 'Simča', name: 'Simona Ričovská', avatarUrl: '/avatars/users/simca.png', status: 'offline' }
-        ],
-        '10': [
-          { id: 1, nickname: 'FireFly x3', name: 'Svetlana Pivarčiová', avatarUrl: '/avatars/users/firefly.jpg', role: 'admin', status: 'online' },
-          { id: 2, nickname: 'Nikol', name: 'Nikol Maljarová', avatarUrl: '/avatars/users/nikol.png', status: 'online' },
-          { id: 3, nickname: 'Simča', name: 'Simona Ričovská', avatarUrl: '/avatars/users/simca.png', status: 'offline' }
-        ],
-        '11': [
-          { id: 1, nickname: 'FireFly x3', name: 'Svetlana Pivarčiová', avatarUrl: '/avatars/users/firefly.jpg', role: 'admin', status: 'online' },
-          { id: 2, nickname: 'Nikol', name: 'Nikol Maljarová', avatarUrl: '/avatars/users/nikol.png', status: 'online' },
-          { id: 3, nickname: 'Simča', name: 'Simona Ričovská', avatarUrl: '/avatars/users/simca.png', status: 'offline' }
-        ]
-      } as Record<string, Member[]>,
-      searchResults: [] as { id:string; name:string }[]
+      membersByChannel: {} as Record<string, Member[]>,
+      searchResults: [] as { id: string; name: string }[],
     }
   },
 
   computed: {
+    isCompact(): boolean {
+      return this.$q.screen.lt.sm
+    },
 
-    isCompact(): boolean { return this.$q.screen.lt.sm },
+    user(): User {
+      const apiUser = this.authStore.user as ApiUser | null
+
+      if (!apiUser) {
+        return {
+          id: 0,
+          nickname: '',
+          name: '',
+          avatarUrl: '/avatars/users/default.png',
+          status: 'offline',
+          role: '',
+        }
+      }
+
+      return {
+        id: apiUser.id,
+        nickname: apiUser.nickname,
+        name: `${apiUser.firstName} ${apiUser.lastName}`,
+        avatarUrl: apiUser.avatarUrl,
+        status: apiUser.status,
+        role: '',
+      }
+    },
+
+    channels(): Channel[] {
+      return this.channelsStore.sortedChannels.map((c) => ({
+        id: String(c.id),
+        name: c.name,
+        members: c.nMembers,
+        private: c.visibility === 'private',
+        avatar: c.iconUrl || '/avatars/channels/default.png',
+        invited: c.isInvited,
+        lastMessageAt: c.lastMessageAt ? new Date(c.lastMessageAt).getTime() : undefined,
+      }))
+    },
 
     filtered(): Channel[] {
       const s = this.search.trim().toLowerCase()
 
       const base = this.channels
-        .filter(c =>
-          this.filter === 'all' ||
-          (this.filter === 'public' && !c.private) ||
-          (this.filter === 'private' && c.private)
+        .filter(
+          (c) =>
+            this.filter === 'all' ||
+            (this.filter === 'public' && !c.private) ||
+            (this.filter === 'private' && c.private)
         )
-        .filter(c => (s ? c.name.toLowerCase().includes(s) : true))
+        .filter((c) => (s ? c.name.toLowerCase().includes(s) : true))
 
-      const invited = base.filter(c => c.invited)
-      const normal = base.filter(c => !c.invited)
+      const invited = base.filter((c) => c.invited)
+      const normal = base.filter((c) => !c.invited)
 
       normal.sort((a, b) => (b.lastMessageAt ?? 0) - (a.lastMessageAt ?? 0))
 
@@ -317,23 +302,26 @@ export default defineComponent({
     activeChannel(): Channel | null {
       const id = this.$route.params.id as string | undefined
       if (!id) return null
-      return this.channels.find(c => c.id === id) ?? null
+      return this.channels.find((c) => c.id === id) ?? null
     },
 
     activeMembers(): Member[] {
       const id = this.$route.params.id as string | undefined
-      return id ? (this.membersByChannel[id] || []) : []
+      return id ? this.membersByChannel[id] || [] : []
     },
 
     isSettingsRoute(): boolean {
       return this.$route.path.startsWith('/home/settings')
-    }
-
+    },
   },
 
   watch: {
-    '$route.name'() { this.updateLeftOpen() },
-    isCompact() { this.updateLeftOpen() },
+    '$route.name'() {
+      this.updateLeftOpen()
+    },
+    isCompact() {
+      this.updateLeftOpen()
+    },
 
     '$route.query.modal': {
       immediate: true,
@@ -341,16 +329,37 @@ export default defineComponent({
         const m = typeof v === 'string' ? v : ''
         this.showSelect = m === 'channels'
         this.showCreate = m === 'channels-create'
-        this.showJoin   = m === 'channels-join'
+        this.showJoin = m === 'channels-join'
         this.showSearch = m === 'channels-search'
-      }
-    }
+      },
+    },
+
+    activeChannel: {
+      async handler(newVal) {
+        if (newVal && this.showMembers) {
+          await this.loadMembers(newVal.id)
+        }
+      },
+    },
   },
 
-  mounted() { this.updateLeftOpen() },
+  mounted() {
+    this.updateLeftOpen()
+    void this.channelsStore.fetchChannels()
+  },
 
   methods: {
-    onDialogModel(v: boolean, modalKey: 'channels'|'channels-create'|'channels-join'|'channels-search') {
+    async loadMembers(channelId: string) {
+      const id = Number(channelId)
+      if (!id) return
+      const members = await channelService.listMembers(id)
+      this.membersByChannel[channelId] = members as unknown as Member[]
+    },
+
+    onDialogModel(
+      v: boolean,
+      modalKey: 'channels' | 'channels-create' | 'channels-join' | 'channels-search'
+    ) {
       if (!v && this.$route.query.modal === modalKey) this.closeModal()
     },
 
@@ -370,12 +379,21 @@ export default defineComponent({
       this.searchResults = []
     },
 
-    openCreate() { this.goModal('channels-create') },
-    openJoin()   { this.goModal('channels-join') },
-    openSearch() { this.goModal('channels-search') },
-    backToSelect() { this.goModal('channels') },
+    openCreate() {
+      this.goModal('channels-create')
+    },
+    openJoin() {
+      this.goModal('channels-join')
+    },
+    openSearch() {
+      this.goModal('channels-search')
+    },
+    backToSelect() {
+      this.goModal('channels')
+    },
 
-    handleCreate() {
+    async handleCreate(payload: CreateChannelPayload) {
+      await this.channelsStore.createChannel(payload)
       this.closeModal()
     },
 
@@ -384,14 +402,11 @@ export default defineComponent({
     },
 
     handleSearch(query: string) {
-      const all = [
-        { id: '1', name: 'Study Together' },
-        { id: '2', name: 'Frontend Guild' },
-        { id: '3', name: 'Anime Soul' }
-      ]
-      this.searchResults = query
-        ? all.filter(c => c.name.toLowerCase().includes(query.toLowerCase()))
-        : []
+      if (!query.trim()) {
+        this.searchResults = []
+        return
+      }
+      this.searchResults = []
     },
 
     handleJoinFromSearch() {
@@ -411,20 +426,19 @@ export default defineComponent({
       void this.$router.push({ name: 'channel', params: { id: c.id } })
     },
 
-    acceptInvite(c: Channel) {
-      c.invited = false
+    async acceptInvite(c: Channel) {
+      const joined = await channelService.joinByName({ name: c.name })
+      this.channelsStore.UPSERT_CHANNEL(joined)
     },
 
     declineInvite(c: Channel) {
-      this.channels = this.channels.filter(ch => ch.id !== c.id)
+      const id = Number(c.id)
+      this.channelsStore.REMOVE_CHANNEL(id)
     },
 
-    handleMessage() {
-    },
+    handleMessage() {},
 
-    handleMention() {
-
-    },
+    handleMention() {},
 
     goBackToChannel() {
       const id = this.$route.params.id
@@ -442,22 +456,21 @@ export default defineComponent({
     handleProfileAction(action: string) {
       switch (action) {
         case 'settings':
-          void this.$router.push({ name: 'profile-settings' });
+          void this.$router.push({ name: 'profile-settings' })
           break
         case 'notify':
-          ;
           break
       }
     },
 
-    handleCommand({ command, args }: { command: string, args: string[] }) {
+    handleCommand({ command, args }: { command: string; args: string[] }) {
       if (this.isSettingsRoute) {
         if (!command.startsWith('/')) return
 
         const name = command.slice(1)
         switch (name) {
           case 'list':
-            this.toggleMembers()
+            void this.toggleMembers()
             break
           default:
             console.log('Unknown settings command:', name, args)
@@ -468,7 +481,7 @@ export default defineComponent({
       switch (command) {
         case 'list':
           if (this.activeChannel) {
-            this.toggleMembers()
+            void this.toggleMembers()
           }
           break
         default:
@@ -476,11 +489,17 @@ export default defineComponent({
       }
     },
 
+    async toggleMembers() {
+      const active = this.activeChannel
+      if (!active) return
 
-    toggleMembers(){
+      if (!this.membersByChannel[active.id]) {
+        await this.loadMembers(active.id)
+      }
+
       this.showMembers = !this.showMembers
-    }
-  }
+    },
+  },
 })
 </script>
 
@@ -505,5 +524,7 @@ export default defineComponent({
   }
 }
 
-:deep(.q-dialog__backdrop) { backdrop-filter: blur(4px); }
+:deep(.q-dialog__backdrop) {
+  backdrop-filter: blur(4px);
+}
 </style>
