@@ -5,14 +5,15 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('layouts/AuthLayout.vue'),
     children: [
-      { name: 'login', path: '', component: () => import('pages/AuthPage.vue') },
-      { name: 'register', path: 'register', component: () => import('pages/RegisterPage.vue') }
+      { name: 'login', path: '', meta: { guestOnly: true }, component: () => import('pages/AuthPage.vue') },
+      { name: 'register', path: 'register', meta: { guestOnly: true }, component: () => import('pages/RegisterPage.vue') }
     ]
   },
 
   {
     path: '/home',
-    component: () => import('layouts/HomeLayout.vue'),
+    meta: { requiresAuth: true },
+    component: () => import('layouts/MainLayout.vue'),
     children: [
       { name: 'home', path: '', component: () => import('pages/HomePage.vue') }
     ]
@@ -20,6 +21,7 @@ const routes: RouteRecordRaw[] = [
 
   {
     path: '/home/settings',
+    meta: { requiresAuth: true },
     component: () => import('layouts/SettingsLayout.vue'),
     children: [
       { name: 'profile-settings', path: '', component: () => import('pages/ProfileSettings.vue') }
@@ -28,16 +30,10 @@ const routes: RouteRecordRaw[] = [
 
   {
     path: '/channel/:id',
-    component: () => import('layouts/HomeLayout.vue'),
+    meta: { requiresAuth: true },
+    component: () => import('layouts/MainLayout.vue'),
     children: [
-      { name: 'channel', path: '', component: () => import('pages/ChannelChat.vue') }
-    ]
-  },
-
-  {
-    path: '/channel/:id',
-    component: () => import('layouts/ChannelSettingsLayout.vue'),
-    children: [
+      { name: 'channel', path: '', component: () => import('pages/ChannelChat.vue') },
       { name: 'channel-settings', path: 'settings', component: () => import('pages/ChannelSettings.vue') }
     ]
   },

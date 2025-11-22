@@ -24,7 +24,7 @@
           <div v-for="field in fields" :key="field.model">
             <q-input standout class="c-2 always-primary q-mb-sm text-c-3" v-model="form[field.model]" :label="field.label" :type="field.type || 'text'" :rules="field.rules"></q-input>
           </div>
-          <q-btn type="submit" size="md" label="Submit" no-caps class="rad-15 full-width c-5 text-c-1 q-mt-md"></q-btn>
+          <q-btn type="submit" size="md" label="Submit" no-caps :loading="loading" class="rad-15 full-width c-5 text-c-1 q-mt-md"></q-btn>
         </q-form>
       </q-card-section>
       <q-card-section class="text-center q-pt-none">
@@ -92,7 +92,12 @@
       closeOnSubmit: {
         type: Boolean,
         default: true
-      }
+      },
+
+      loading: {
+        type: Boolean,
+        default: false
+      },
     },
 
     data() {
@@ -138,8 +143,8 @@
 
       submitForm() {
         const payload = {
-          data: this.form,
-          image: this.selectedFile
+          ...this.form,
+          avatar: this.selectedFile ?? undefined
         }
         this.$emit('submit', payload)
         if (this.closeOnSubmit) {

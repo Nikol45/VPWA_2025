@@ -12,7 +12,7 @@ import Notification from '#models/notification'
 
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
-  uids: ['email'],
+  uids: ['nickname'],
   passwordColumnName: 'password',
 })
 

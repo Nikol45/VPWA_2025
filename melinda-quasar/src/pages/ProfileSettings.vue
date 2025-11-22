@@ -73,6 +73,7 @@ import { defineComponent } from 'vue'
 import FormField from 'src/components/FormField.vue'
 import BaseForm from 'src/components/auth/BaseForm.vue'
 import ConfirmPopup from 'src/components/popups/ConfirmPopup.vue'
+import { useAuthStore } from 'src/stores/auth'
 
 export default defineComponent({
   name: 'ProfileSettings',
@@ -95,7 +96,7 @@ export default defineComponent({
       passwordFields: [
         { label: 'Old password', model: 'oldPassword', type: 'password' as const, rules: [(val: string) => !!val || 'Old password is required'] },
         { label: 'New password', model: 'newPassword', type: 'password' as const, rules: [(val: string) => !!val || 'New password is required'] },
-        { label: 'Retype new password', model: 'rePassword', type: 'password' as const, rules: [(val: string) => !!val || 'Retyped password is required'] },
+        { label: 'Retype new password', model: 'password_confirmation', type: 'password' as const, rules: [(val: string) => !!val || 'Retyped password is required'] },
       ],
 
       selectedTheme: 'L',
@@ -163,8 +164,14 @@ export default defineComponent({
       
     },
 
-    goAuth() {
-      void this.$router.push('/')
+    async goAuth() {
+      const auth = useAuthStore()
+      try {
+        await auth.logout()
+      } catch (err) {
+        console.error(err)
+      }
+      await this.$router.push('/')
     }
   },
 

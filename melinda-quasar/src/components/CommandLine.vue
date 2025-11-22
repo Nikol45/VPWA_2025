@@ -1,6 +1,6 @@
 <template>
     <div class="row items-center full-width q-gutter-sm">
-      <q-input ref="cmdInput" dense standout="c-4" class="c-4 col q-ma-xxs"
+      <q-input ref="cmdInput" dense standout="c-4" class="rad-15 c-4 col q-ma-xxs"
                type="textarea" autogrow placeholder="Type a message or /command"
                v-model="msg" input-class="text-white" @keydown.enter.exact.prevent="sendMessage" :maxlength="maxChars">
             <template v-if="activeChannel" #prepend>

@@ -1,10 +1,13 @@
 <template>
-    <BaseForm persistent v-model="localShow" :cancel=false title="Login" :fields="fields" note="Don't have an account? Sign up" note-route="/register" :close-on-submit="closeOnSubmit" @submit="onSubmit"/>
+    <BaseForm persistent v-model="localShow" :cancel=false title="Login" :fields="fields" note="Don't have an account? Sign up" note-route="/register" :close-on-submit="false" :loading="loading" @submit="onSubmit"/>
 </template>
 
 <script lang="ts">
     import BaseForm from './BaseForm.vue'
     import { defineComponent } from 'vue'
+    import type { RouteLocationRaw } from 'vue-router'
+    import { useAuthStore } from 'src/stores/auth'
+    import type { LoginCredentials } from 'src/contracts'
 
     interface Field {
         label: string
@@ -34,7 +37,7 @@
             return {
                 localShow: this.modelValue,
                 fields: [
-                    { label: 'Email *', model: 'email', type: 'email', rules: [(val: string) => !!val || 'Email is required'] },
+                    { label: 'Nickname *', model: 'nickname', type: 'string', rules: [(val: string) => !!val || 'Nickname is required'] },
                     { label: 'Password *', model: 'password', type: 'password', rules: [(val: string) => !!val || 'Password is required'] },
                 ] as Field[],
             }
@@ -50,9 +53,31 @@
             }
         },
 
+        computed: {
+            redirectTo (): RouteLocationRaw {
+                return (this.$route.query.redirect as string) || { name: 'home' }
+            },
+            
+            loading (): boolean {
+                const auth = useAuthStore()
+                return auth.status === 'pending'
+            }
+        },
+
         methods: {
-            onSubmit(formData : Record<string, string>) {
-                this.$emit('submit', formData)
+            async onSubmit(formData: LoginCredentials) {
+                const auth = useAuthStore()
+                try {
+                    await auth.login(formData)
+                    this.localShow = false
+                    await this.$router.push(this.redirectTo)
+                } catch (err) {
+                    console.error(err)
+                    this.$q.notify({
+                        type: 'negative',
+                        message: 'Incorrect nickname or password',
+                    })
+                }
             }
         }
     })

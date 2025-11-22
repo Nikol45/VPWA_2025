@@ -1,6 +1,6 @@
 <template>
   <q-page class="c-3">
-    <Login v-model="showLogin" @submit="handleLogin" :close-on-submit="true"/>
+    <Login v-model="showLogin" @submit="handleLogin" :close-on-submit="false"/>
   </q-page>
 </template>
 
@@ -19,15 +19,8 @@
     },
 
     methods: {
-      async handleLogin(formData : Record<string, string>) {
-        console.log("Received login data:", formData)
-        const res = await fetch('http://localhost:3333/test-user')
-        const data = await res.json()
-
-        console.log("User from server:", data)
-
-        await this.$router.replace({ name: 'home' })
-      }
+      async handleLogin() {
+        }
     }
   })
 </script>

@@ -1,7 +1,7 @@
 <template>
     <q-page-container>
         <q-page class="c-3">
-            <Register v-model="showRegister" @submit="handleRegistration" :close-on-submit="true"/>
+            <Register v-model="showRegister" @submit="handleRegistration" :close-on-submit="false"/>
         </q-page>
     </q-page-container>
 </template>
@@ -22,9 +22,6 @@
 
         methods: {
             async handleRegistration() {
-                if (this.$route.name !== 'home') {
-                    await this.$router.replace({ name: 'home' })
-                }
             },
         },
     })
