@@ -7,7 +7,7 @@ export default class Channels extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.string('name', 50).notNullable().unique()
-      table.string('icon_url', 2048).notNullable().defaultTo('/avatars/channels/default_channel.png')
+      table.string('icon_url', 2048).notNullable().defaultTo('/avatars/channels/default_channel.jpg')
       table.enum('visibility', ['public', 'private']).notNullable().defaultTo('public')
       table.integer('n_members').notNullable().defaultTo(0)
       table.integer('admin_id').notNullable().references('id').inTable('users').onDelete('CASCADE')

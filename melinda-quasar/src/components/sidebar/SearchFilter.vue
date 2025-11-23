@@ -1,5 +1,5 @@
 <template>
-    <div class="q-pa-md">
+    <div class="q-px-md q-pt-md q-pb-sm">
         <q-input dense standout v-model="search" placeholder="Search channels..." class="no-padding search-input c-3" input-class="text-c-1">
         <template #prepend>
             <q-icon name="search" class="q-mr-sm" />

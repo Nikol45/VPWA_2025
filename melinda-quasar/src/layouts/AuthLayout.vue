@@ -13,7 +13,7 @@ export default defineComponent({
   name: 'AuthLayout',
 
   created() {
-    const saved = localStorage.getItem('theme') || 'L'
+    const saved = localStorage.getItem('theme') || 'lilac'
     document.documentElement.setAttribute('theme', saved)
     localStorage.setItem('theme', saved)
   }

@@ -55,5 +55,7 @@ router
     router.get('notifications', '#controllers/notifications_controller.index')
     router.patch('me/status', '#controllers/users_controller.updateStatus')
     router.patch('me/notifications', '#controllers/users_controller.updateNotificationSetting')
+    router.patch('me/theme', '#controllers/users_controller.updateTheme')
+    router.patch('users/me/profile', '#controllers/users_controller.updateProfile')
   })
   .use(middleware.auth())

@@ -58,7 +58,7 @@ export default class ChannelSeeder extends BaseSeeder {
       },
       {
         name: 'CEO',
-        iconUrl: '/avatars/channels/default_channel.png',
+        iconUrl: '/avatars/channels/default_channel.jpg',
         visibility: 'public',
         nMembers: 2,
         adminId: 4,
@@ -66,7 +66,7 @@ export default class ChannelSeeder extends BaseSeeder {
       },
       {
         name: 'Marvel Rivals',
-        iconUrl: '/avatars/channels/default_channel.png',
+        iconUrl: '/avatars/channels/default_channel.jpg',
         visibility: 'public',
         nMembers: 500,
         adminId: 3,
@@ -74,7 +74,7 @@ export default class ChannelSeeder extends BaseSeeder {
       },
       {
         name: 'League of Legends',
-        iconUrl: '/avatars/channels/default_channel.png',
+        iconUrl: '/avatars/channels/default_channel.jpg',
         visibility: 'public',
         nMembers: 1000,
         adminId: 5,

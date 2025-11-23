@@ -26,7 +26,7 @@
         </div>
     </div>
 </template>
-<!-- Ano, vieme, ze existuje quasar komponent chat-message ale nepacil sa nam jeho dizajn, tak sme si vytvorili vlastny :D -->
+<!-- Ano, vieme, ze existuje quasar komponent chat-message ale nepacil sa nam jeho dizajn, tak sme si vytvorili vlastny :> -->
 
 <script lang="ts">
 import { defineComponent } from 'vue'
@@ -96,9 +96,9 @@ export default defineComponent({
     .bubble.mine  { background: var(--c-2); color: var(--c-5); margin-left: auto; }
 
     .mention .bubble {
-      background-color: rgba(255, 215, 0, 0.25);
-      box-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
-      border: 2px rgba(255, 215, 0, 0.6);
+      background: var(--c-1);
+      box-shadow: 0 0 8px var(--c-3);
+      border: 2px var(--c-2);
       border-style: dotted;
     }
 

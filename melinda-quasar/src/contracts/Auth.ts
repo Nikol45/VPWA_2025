@@ -20,6 +20,10 @@ export interface LoginCredentials {
   password: string
 }
 
+export type UserTheme = 'lilac' | 'midnight' | 'pink_chocolate' | 'forest'
+export type UserStatus = 'online' | 'dnd' | 'offline'
+export type NotificationSetting = 'show_all' | 'mentions_only' | 'mute_all'
+
 export interface User {
   id: number
 
@@ -27,11 +31,12 @@ export interface User {
   lastName: string
   nickname: string
   email: string
-  
-  theme: 'lilac' | 'midnight' | 'pink_chocolate' | 'forest'
+
   avatarUrl: string
-  status: 'online' | 'dnd' | 'offline'
-  notificationSetting: 'show_all' | 'mentions_only' | 'mute_all'
+
+  theme: UserTheme
+  status: UserStatus
+  notificationSetting: NotificationSetting
 
   createdAt: string
   updatedAt: string | null

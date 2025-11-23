@@ -143,7 +143,7 @@ export default class MessageSeeder extends BaseSeeder {
         userId: 6,
         channelId: 1,
         mentions: [2],
-        text: '@firefly96 x3 klídek, už som ho umyl, uplne ako novy 😎',
+        text: '@firefly96 klídek, už som ho umyl, uplne ako novy 😎',
       },
       {
         userId: 4,
@@ -184,7 +184,7 @@ export default class MessageSeeder extends BaseSeeder {
         userId: 4,
         channelId: 2,
         mentions: [2],
-        text: '@firefly96 x3 ty si náš záchranca, bez teba by sme to nedali 🫶',
+        text: '@firefly96 ty si náš záchranca, bez teba by sme to nedali 🫶',
       },
       {
         userId: 1,
@@ -353,7 +353,7 @@ export default class MessageSeeder extends BaseSeeder {
         userId: 1,
         channelId: 8,
         mentions: [2, 3],
-        text: '@firefly96 x3 @Svatec môžeme spraviť mini konzultačky medzi učením.',
+        text: '@firefly96 @Svatec môžeme spraviť mini konzultačky medzi učením.',
       },
     ])
   }

@@ -32,6 +32,16 @@
           <form-field v-model="user.email" title="E-mail" />
         </div>
 
+        <div class="q-mt-md">
+          <q-btn
+            size="13px"
+            label="Save profile"
+            no-caps
+            class="c-5 text-weight-bold text-c-1 q-py-sm q-px-lg full-width"
+            @click="saveProfile"
+          />
+        </div>
+
         <div class="row q-gutter-lg q-mt-md">
           <q-btn
             flat
@@ -135,11 +145,13 @@ import FormField from 'src/components/FormField.vue'
 import BaseForm from 'src/components/auth/BaseForm.vue'
 import ConfirmPopup from 'src/components/popups/ConfirmPopup.vue'
 import { useAuthStore } from 'src/stores/auth'
-import type { User as ApiUser } from 'src/contracts'
 import { userService } from 'src/services'
-
-type StatusValue = 'online' | 'dnd' | 'offline'
-type NotificationValue = 'show_all' | 'mentions_only' | 'mute_all'
+import type {
+  User as ApiUser,
+  UserTheme,
+  UserStatus,
+  NotificationSetting,
+} from 'src/contracts'
 
 interface LocalUser {
   nickname: string
@@ -189,28 +201,36 @@ export default defineComponent({
         },
       ],
 
-      selectedTheme: 'L',
-      status: 'online' as StatusValue,
-      notifications: 'show_all' as NotificationValue,
+      selectedTheme: 'lilac' as UserTheme,
+      status: 'online' as UserStatus,
+      notifications: 'show_all' as NotificationSetting,
 
       themes: [
-        { id: 'L', name: 'Lilac dream', preview: '/themes/gradient_lilac.png' },
-        { id: 'B', name: 'Midnight blue', preview: '/themes/gradient_blue.png' },
-        { id: 'P', name: 'Pink chocolate', preview: '/themes/gradient_choco.png' },
-        { id: 'G', name: 'Mystical forest', preview: '/themes/gradient_forest.png' },
+        { id: 'lilac' as UserTheme, name: 'Lilac dream', preview: '/themes/gradient_lilac.png' },
+        { id: 'midnight' as UserTheme, name: 'Midnight blue', preview: '/themes/gradient_blue.png' },
+        {
+          id: 'pink_chocolate' as UserTheme,
+          name: 'Pink chocolate',
+          preview: '/themes/gradient_choco.png',
+        },
+        {
+          id: 'forest' as UserTheme,
+          name: 'Mystical forest',
+          preview: '/themes/gradient_forest.png',
+        },
       ],
 
       statusOptions: [
-        { label: 'Online', value: 'online' },
-        { label: 'Do not disturb', value: 'dnd' },
-        { label: 'Offline', value: 'offline' },
-      ] as { label: string; value: StatusValue }[],
+        { label: 'Online', value: 'online' as UserStatus },
+        { label: 'Do not disturb', value: 'dnd' as UserStatus },
+        { label: 'Offline', value: 'offline' as UserStatus },
+      ],
 
       notificationOptions: [
-        { label: 'Show all', value: 'show_all' },
-        { label: 'Show mentions only', value: 'mentions_only' },
-        { label: 'Mute all', value: 'mute_all' },
-      ] as { label: string; value: NotificationValue }[],
+        { label: 'Show all', value: 'show_all' as NotificationSetting },
+        { label: 'Show mentions only', value: 'mentions_only' as NotificationSetting },
+        { label: 'Mute all', value: 'mute_all' as NotificationSetting },
+      ],
     }
   },
 
@@ -230,21 +250,44 @@ export default defineComponent({
   },
 
   watch: {
-    async status(newStatus: StatusValue, oldStatus: StatusValue) {
+    async status(newStatus: UserStatus, oldStatus: UserStatus) {
       if (newStatus === oldStatus) return
       const auth = useAuthStore()
-      const updated = await userService.updateStatus(newStatus)
-      if (auth.user) {
-        auth.user.status = updated.status
+      try {
+        const updated = await userService.updateStatus(newStatus)
+        if (auth.user) {
+          auth.user.status = updated.status
+        }
+      } catch {
+        this.status = oldStatus
+        this.$q.notify({
+          type: 'negative',
+          message: 'Failed to update status',
+          position: 'bottom-right',
+          timeout: 2000,
+        })
       }
     },
 
-    async notifications(newValue: NotificationValue, oldValue: NotificationValue) {
+    async notifications(
+      newValue: NotificationSetting,
+      oldValue: NotificationSetting
+    ) {
       if (newValue === oldValue) return
       const auth = useAuthStore()
-      const updated = await userService.updateNotificationSetting(newValue)
-      if (auth.user) {
-        auth.user.notificationSetting = updated.notificationSetting
+      try {
+        const updated = await userService.updateNotificationSetting(newValue)
+        if (auth.user) {
+          auth.user.notificationSetting = updated.notificationSetting
+        }
+      } catch {
+        this.notifications = oldValue
+        this.$q.notify({
+          type: 'negative',
+          message: 'Failed to update notification settings',
+          position: 'bottom-right',
+          timeout: 2000,
+        })
       }
     },
 
@@ -268,22 +311,47 @@ export default defineComponent({
       this.user.name = `${apiUser.firstName} ${apiUser.lastName}`.trim()
       this.user.email = apiUser.email
       this.user.avatar = apiUser.avatarUrl || '/avatars/users/default.png'
-      this.status = apiUser.status as StatusValue
-      this.notifications = apiUser.notificationSetting as NotificationValue
+
+      this.status = apiUser.status
+      this.notifications = apiUser.notificationSetting
+      this.selectedTheme = apiUser.theme
     }
 
-    const savedTheme = localStorage.getItem('theme')
-    if (savedTheme) {
-      this.selectedTheme = savedTheme
-      document.documentElement.setAttribute('theme', savedTheme)
+    const savedTheme = localStorage.getItem('theme') as UserTheme | null
+    const themeToApply = savedTheme ?? this.selectedTheme
+
+    if (themeToApply) {
+      this.selectedTheme = themeToApply
+      document.documentElement.setAttribute('theme', themeToApply)
     }
   },
 
   methods: {
-    selectTheme(themeId: string) {
+    async selectTheme(themeId: UserTheme) {
+      if (this.selectedTheme === themeId) return
+
+      const previous = this.selectedTheme
       this.selectedTheme = themeId
       document.documentElement.setAttribute('theme', themeId)
       localStorage.setItem('theme', themeId)
+
+      const auth = useAuthStore()
+      try {
+        const updated = await userService.updateTheme(themeId)
+        if (auth.user) {
+          auth.user.theme = updated.theme
+        }
+      } catch {
+        this.selectedTheme = previous
+        document.documentElement.setAttribute('theme', previous)
+        localStorage.setItem('theme', previous)
+        this.$q.notify({
+          type: 'negative',
+          message: 'Failed to update theme',
+          position: 'bottom-right',
+          timeout: 2000,
+        })
+      }
     },
 
     changePfp() {
@@ -294,28 +362,65 @@ export default defineComponent({
 
       input.onchange = (event: Event) => {
         const file = (event.target as HTMLInputElement).files?.[0]
-        if (file) {
-          if (!file.type.startsWith('image/')) {
-            this.$q.notify({
-              type: 'warning',
-              message: 'Please select a valid image file (JPEG, PNG, etc.)',
-              position: 'bottom-right',
-              color: 'negative',
-              timeout: 2500,
-            })
-            return
-          }
-          const reader = new FileReader()
-          reader.onload = (e) => {
-            const previewUrl = e.target?.result as string
-            this.user.avatar = previewUrl
-          }
-          reader.readAsDataURL(file)
+        if (!file) return
+
+        if (!file.type.startsWith('image/')) {
+          this.$q.notify({
+            type: 'warning',
+            message: 'Please select a valid image file (JPEG, PNG, etc.)',
+            position: 'bottom-right',
+            color: 'negative',
+            timeout: 2500,
+          })
+          return
         }
+
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          const previewUrl = e.target?.result as string
+          this.user.avatar = previewUrl
+          // Tu je zatiaľ len lokálny preview, nie upload do DB.
+        }
+        reader.readAsDataURL(file)
+      }
+    },
+
+    async saveProfile() {
+      const auth = useAuthStore()
+
+      try {
+        const updated = await userService.updateProfile({
+          nickname: this.user.nickname,
+          firstName: this.user.firstName,
+          lastName: this.user.lastName,
+          email: this.user.email,
+        })
+
+        if (auth.user) {
+          auth.user.nickname = updated.nickname
+          auth.user.firstName = updated.firstName
+          auth.user.lastName = updated.lastName
+          auth.user.email = updated.email
+        }
+
+        this.$q.notify({
+          type: 'positive',
+          message: 'Profile updated',
+          position: 'bottom-right',
+          timeout: 2000,
+        })
+      } catch {
+        this.$q.notify({
+          type: 'negative',
+          message: 'Failed to update profile',
+          position: 'bottom-right',
+          timeout: 2000,
+        })
       }
     },
 
     handlePasswordChange() {
+      // Tu môžeš neskôr doplniť API na zmenu hesla
     },
 
     async goAuth() {
@@ -368,5 +473,9 @@ export default defineComponent({
 
 .theme-item {
   max-width: 150px;
+}
+
+.full-width {
+  width: 100%;
 }
 </style>

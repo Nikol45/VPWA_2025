@@ -11,19 +11,19 @@
   --b-4: #1E2F3F;
   --b-5: #182633;
 
-  --p-1: #FFDEDE;
-  --p-2: #F0BBBB;
-  --p-3: #613737;
-  --p-4: #401F1F;
-  --p-5: #331818;
+  --p-1: #fff3f3;
+  --p-2: #b48a84;
+  --p-3: #7c5852;
+  --p-4: #442824;
+  --p-5: #2c1612;
 
-  --g-1: #DEFFEB;
+  --g-1: #ecfff3;
   --g-2: #BBF0CB;
-  --g-3: #376144;
+  --g-3: #437352;
   --g-4: #1F4029;
   --g-5: #183320;
 
-    /* DEFAULT = L */
+    /* DEFAULT */
     --c-1: var(--l-1);
     --c-2: var(--l-2);
     --c-3: var(--l-3);
@@ -31,7 +31,7 @@
     --c-5: var(--l-5);
 }
 
-:root[theme="L"] {
+:root[theme="lilac"] {
   --c-1: var(--l-1);
   --c-2: var(--l-2);
   --c-3: var(--l-3);
@@ -39,7 +39,7 @@
   --c-5: var(--l-5);
 }
 
-:root[theme="B"] {
+:root[theme="midnight"] {
   --c-1: var(--b-1);
   --c-2: var(--b-2);
   --c-3: var(--b-3);
@@ -47,7 +47,7 @@
   --c-5: var(--b-5);
 }
 
-:root[theme="P"] {
+:root[theme="pink_chocolate"] {
   --c-1: var(--p-1);
   --c-2: var(--p-2);
   --c-3: var(--p-3);
@@ -55,14 +55,13 @@
   --c-5: var(--p-5);
 }
 
-:root[theme="G"] {
+:root[theme="forest"] {
   --c-1: var(--g-1);
   --c-2: var(--g-2);
   --c-3: var(--g-3);
   --c-4: var(--g-4);
   --c-5: var(--g-5);
 }
-
 
 .c-1 {  background-color: var(--c-1) !important;}
 .c-2 {  background-color: var(--c-2) !important;}

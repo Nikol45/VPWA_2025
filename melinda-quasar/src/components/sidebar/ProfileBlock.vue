@@ -95,7 +95,7 @@
                 notifications: [
                     { id: 1, title: 'Nikol', text: 'Created voting to kick you from channel Ženy na FIIT', avatar: '/avatars/users/nikol.png' },
                     { id: 2, title: 'Simča', text: 'Voted to kick you out of Ženy na FIIT (2/3)', avatar: '/avatars/users/simca.png' },
-                    { id: 3, title: 'Firefly x3', text: 'You were invited to channel FIIT STU', avatar: '/avatars/users/firefly.jpg' },
+                    { id: 3, title: 'Firefly', text: 'You were invited to channel FIIT STU', avatar: '/avatars/users/firefly.jpg' },
                     { id: 4, title: 'Share & Care', text: 'Warning: channel Share & Care will be closed in 3 days', avatar: '/avatars/channels/cerveny.png' }
                 ]
             }
