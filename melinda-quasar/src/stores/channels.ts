@@ -64,6 +64,11 @@ export const useChannelsStore = defineStore('channels', {
       this.items = this.items.filter((c) => c.id !== id)
     },
 
+    UPDATE_LAST_MESSAGE_AT(id: number, timestamp: string) {
+      const c = this.items.find((ch) => ch.id === id)
+      if (c) c.lastMessageAt = timestamp
+    },
+
     acceptInvite(id: number) {
       const channel = this.items.find((c) => c.id === id)
       if (!channel) return

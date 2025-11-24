@@ -2,7 +2,7 @@
     <div class="row items-center full-width q-gutter-sm">
       <q-input ref="cmdInput" dense standout="c-4" class="rad-15 c-4 col q-ma-xxs"
                type="textarea" autogrow placeholder="Type a message or /command"
-               v-model="msg" input-class="text-white" @keydown.enter.exact.prevent="sendMessage" :maxlength="maxChars">
+               v-model="msg" input-class="text-white" @keydown.enter.exact.prevent="sendMessage" :maxlength="maxChars" @input="emitTyping">
             <template v-if="activeChannel" #prepend>
                 <q-btn flat round dense class="text-c-1" icon="emoji_emotions" ref="emojiBtn"/>
                 <q-menu anchor="top left" self="bottom left" ref="emojiMenu" transition-show="jump-down" transition-hide="jump-up" class="rad-15 c-1" :offset="[0, 4]">
@@ -36,6 +36,7 @@
     import { defineComponent, nextTick, type PropType} from 'vue'
     import type { QInput, QMenu } from 'quasar'
     import type { Member } from 'src/types/common.ts'
+    import { wsClient } from 'src/ws/client'
 
     interface Channel {
         id: string
@@ -100,10 +101,15 @@
                 else if (text.startsWith('@')) {
                     const [mention] = text.substring(1).split(' ')
                     this.$emit('mention', { mention })
+                    if (this.activeChannel) {
+                        wsClient.sendMessage(Number(this.activeChannel.id), text)
+                    }
                 }
 
                 else {
-                    this.$emit('message', text)
+                    if (this.activeChannel) {
+                        wsClient.sendMessage(Number(this.activeChannel.id), text)
+                    }
                 }
 
                 this.msg = ''
@@ -115,6 +121,21 @@
                 const menu = this.$refs.emojiMenu as QMenu
                 menu.hide()
             },
+
+            emitTyping(e: string | InputEvent) {
+                let text: string
+
+                if (typeof e === 'string') {
+                    text = e
+                }
+                
+                else {
+                    const target = e.target as HTMLInputElement | null
+                    text = target?.value ?? ''
+                }
+
+                this.$emit('typing', text)
+            }
         },
 
         computed: {
@@ -198,7 +219,7 @@
             }
         },
 
-        emits: ['command', 'message', 'mention'],
+        emits: ['command', 'message', 'mention', 'typing'],
     })
 </script>
 

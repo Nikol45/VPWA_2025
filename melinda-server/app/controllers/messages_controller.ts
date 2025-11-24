@@ -5,6 +5,7 @@ import Channel from '#models/channel'
 import User from '#models/user'
 import Notification from '#models/notification'
 import { SendMessageValidator } from '#validators/send_message'
+import { emitToChannel } from '#services/ws_events'
 
 export default class MessagesController {
   private extractMentions(text: string): string[] {
@@ -93,13 +94,15 @@ export default class MessagesController {
 
     if (before) {
       const beforeDate = DateTime.fromISO(before)
-      if (beforeDate.isValid) {
+      
+      if (!beforeDate.isValid) {
+      }
+      else {
         query.where('created_at', '<', beforeDate.toSQL())
       }
     }
 
     const safeLimit = Number.isFinite(limit) ? Math.min(Math.max(limit, 1), 100) : 20
-
     const messages = await query.limit(safeLimit)
 
     return messages.map((m) => m.serialize())
@@ -156,6 +159,8 @@ export default class MessagesController {
     await this.createNotifications(channel, user, message, mentions)
 
     await message.load('user')
+
+    emitToChannel(channel.id, 'message:new', message.serialize())
 
     return message.serialize()
   }

@@ -5,6 +5,7 @@ import type { User, RegisterData, LoginCredentials } from 'src/contracts'
 import type { AxiosError } from 'axios'
 import authService from 'src/services/AuthService'
 import ValidationError from 'src/errors/ValidationError'
+import { wsClient } from 'src/ws/client'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -80,6 +81,7 @@ export const useAuthStore = defineStore('auth', {
         authManager.setToken(res.data.token)
 
         this.AUTH_SUCCESS(null)
+        wsClient.connect()
         return res.data
       } catch (err: unknown) {
         const error = err as AxiosError<{ errors?: { message: string }[] }>
@@ -94,6 +96,7 @@ export const useAuthStore = defineStore('auth', {
         await api.post('/auth/logout')
         authManager.removeToken()
         this.AUTH_SUCCESS(null)
+        wsClient.disconnect()
       } catch (err) {
         this.AUTH_ERROR(err)
         throw err

@@ -97,6 +97,7 @@
         @command="handleCommand"
         @message="handleMessage"
         @mention="handleMention"
+        @input="onTyping"
       />
     </q-footer>
   </q-layout>
@@ -161,6 +162,7 @@ import { useAuthStore } from 'src/stores/auth'
 import type { User as ApiUser } from 'src/contracts'
 import type { ChannelVisibility } from 'src/contracts'
 import { channelService } from 'src/services'
+import { wsClient } from 'src/ws/client'
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -235,6 +237,7 @@ export default defineComponent({
 
       membersByChannel: {} as Record<string, Member[]>,
       searchResults: [] as { id: string; name: string }[],
+      wsJoinedChannel: null
     }
   },
 
@@ -339,11 +342,27 @@ export default defineComponent({
         if (newVal && this.showMembers) {
           await this.loadMembers(newVal.id)
         }
+
+        if (this.wsJoinedChannel) {
+          wsClient.leaveChannel(Number(this.wsJoinedChannel))
+        }
+
+        if (newVal) {
+          wsClient.joinChannel(Number(newVal.id))
+          this.wsJoinedChannel = newVal.id
+        }
       },
     },
   },
 
+  beforeUnmount() {
+    if (this.wsJoinedChannel) {
+      wsClient.leaveChannel(Number(this.wsJoinedChannel))
+    }
+  },
+
   mounted() {
+    wsClient.connect()
     this.updateLeftOpen()
     void this.channelsStore.fetchChannels()
   },
@@ -463,7 +482,7 @@ export default defineComponent({
       }
     },
 
-    handleCommand({ command, args }: { command: string; args: string[] }) {
+    handleCommand({ command }: { command: string; args: string[] }) {
       if (this.isSettingsRoute) {
         if (!command.startsWith('/')) return
 
@@ -473,7 +492,6 @@ export default defineComponent({
             void this.toggleMembers()
             break
           default:
-            console.log('Unknown settings command:', name, args)
         }
         return
       }
@@ -484,8 +502,6 @@ export default defineComponent({
             void this.toggleMembers()
           }
           break
-        default:
-          console.log('Unknown command:', command, args)
       }
     },
 
@@ -499,6 +515,12 @@ export default defineComponent({
 
       this.showMembers = !this.showMembers
     },
+
+    onTyping(text: string) {
+      const c = this.activeChannel
+      if (!c) return
+      wsClient.sendTyping(Number(c.id), text.length > 0, text)
+    }
   },
 })
 </script>
