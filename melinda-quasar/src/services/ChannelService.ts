@@ -7,8 +7,17 @@ class ChannelService {
     return response.data
   }
 
-  async create(payload: { name: string; visibility: ChannelVisibility; iconUrl?: string }): Promise<Channel> {
-    const response = await api.post<Channel>('channels', payload)
+  async create(payload: { name: string; visibility: 'public' | 'private'; icon?: File | null }): Promise<Channel> {
+    const formData = new FormData()
+    
+    formData.append('name', payload.name)
+    formData.append('visibility', payload.visibility)
+    
+    if (payload.icon && payload.icon instanceof File) {
+        formData.append('icon', payload.icon)
+    }
+
+    const response = await api.post<Channel>('channels', formData)
     return response.data
   }
 
@@ -25,16 +34,22 @@ class ChannelService {
     await api.delete(`channels/${id}`)
   }
 
-  async invite(channelId: number, payload: { nickname: string }): Promise<void> {
-    await api.post(`channels/${channelId}/invite`, payload)
+  async invite(channelId: number, payload: { nickname: string }): Promise<{ success: boolean, invited: boolean, message?: string }> {
+    const response = await api.post(`channels/${channelId}/invite`, payload)
+    return response.data
   }
 
   async revoke(channelId: number, nickname: string): Promise<void> {
     await api.post(`channels/${channelId}/revoke`, { nickname })
   }
 
-  async kick(channelId: number, nickname: string): Promise<void> {
-    await api.post(`channels/${channelId}/kick`, { nickname })
+  async decline(channelId: number): Promise<void> {
+    await api.post(`channels/${channelId}/decline`)
+  }
+
+  async kick(channelId: number, nickname: string): Promise<{ success: boolean, banned: boolean, votes: number, message: string }> {
+    const response = await api.post(`channels/${channelId}/kick`, { nickname })
+    return response.data
   }
 
   async ban(channelId: number, nickname: string): Promise<void> {

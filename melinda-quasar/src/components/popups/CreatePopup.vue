@@ -41,7 +41,7 @@
 
       <q-card-actions align="between" class="q-mt-lg">
         <q-btn flat no-caps class="text-c-3" label="Back" @click="$emit('back')" />
-        <q-btn no-caps class="c-5 text-c-1 rad-15" label="Create" @click="submit" :disable="!form.name || !form.privacy || !form.image"/>
+        <q-btn no-caps class="c-5 text-c-1 rad-15" label="Create" @click="submit" :disable="!form.name || !form.privacy"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -115,7 +115,7 @@ export default defineComponent({
     },
 
     submit(){
-      if (!this.form.name || !this.form.privacy || !this.form.image) {
+      if (!this.form.name || !this.form.privacy) {
         return
       }
       this.$emit('submit', { ...this.form })

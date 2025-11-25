@@ -160,9 +160,9 @@ import type { QVueGlobals } from 'quasar'
 import { useChannelsStore } from 'src/stores/channels'
 import { useAuthStore } from 'src/stores/auth'
 import type { User as ApiUser } from 'src/contracts'
-import type { ChannelVisibility } from 'src/contracts'
 import { channelService } from 'src/services'
 import { wsClient } from 'src/ws/client'
+import type { AxiosError } from 'axios'
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -191,12 +191,7 @@ interface Channel {
   avatar: string
   invited: boolean
   lastMessageAt?: number | undefined
-}
-
-interface CreateChannelPayload {
-  name: string
-  visibility: ChannelVisibility
-  iconUrl?: string
+  isAdmin: boolean
 }
 
 export default defineComponent({
@@ -271,15 +266,24 @@ export default defineComponent({
     },
 
     channels(): Channel[] {
-      return this.channelsStore.sortedChannels.map((c) => ({
-        id: String(c.id),
-        name: c.name,
-        members: c.nMembers,
-        private: c.visibility === 'private',
-        avatar: c.iconUrl || '/avatars/channels/default.png',
-        invited: c.isInvited,
-        lastMessageAt: c.lastMessageAt ? new Date(c.lastMessageAt).getTime() : undefined,
-      }))
+      return this.channelsStore.sortedChannels.map((c) => {
+        let avatarPath = c.iconUrl || '/avatars/channels/default_channel.jpg'
+
+        if (!avatarPath.startsWith('http') && !avatarPath.startsWith('data:')) {
+           avatarPath = `${import.meta.env.VITE_API_URL}${avatarPath}`
+        }
+
+        return {
+          id: String(c.id),
+          name: c.name,
+          members: c.nMembers,
+          private: c.visibility === 'private',
+          avatar: avatarPath,
+          invited: c.isInvited,
+          lastMessageAt: c.lastMessageAt ? new Date(c.lastMessageAt).getTime() : undefined,
+          isAdmin: c.isAdmin
+        }
+      })
     },
 
     filtered(): Channel[] {
@@ -353,6 +357,28 @@ export default defineComponent({
         }
       },
     },
+
+    'activeChannel.members': {
+      handler() {
+        if (this.showMembers && this.activeChannel) {
+           void this.loadMembers(this.activeChannel.id)
+        }
+      }
+    },
+
+    'channelsStore.items': {
+      deep: true,
+      handler(newChannels: { id: number }[]) { 
+        const currentIdStr = this.$route.params.id as string
+        if (!currentIdStr) return
+
+        const stillExists = newChannels.some(c => String(c.id) === currentIdStr)
+
+        if (!stillExists && (this.$route.name === 'channel' || this.$route.name === 'channel-settings')) {
+           void this.$router.push({ name: 'home' })
+        }
+      }
+    },
   },
 
   beforeUnmount() {
@@ -411,8 +437,31 @@ export default defineComponent({
       this.goModal('channels')
     },
 
-    async handleCreate(payload: CreateChannelPayload) {
-      await this.channelsStore.createChannel(payload)
+    async handleCreate(payload: { name: string, privacy: 'public' | 'private', image: File | null }) {
+      try {
+          const channel = await this.channelsStore.createChannel({
+            name: payload.name,
+            visibility: payload.privacy,
+            icon: payload.image
+          })
+          
+          this.$q.notify({
+            type: 'positive',
+            message: `Channel ${channel.name} created!`,
+            position: 'bottom-right'
+          })
+
+          this.goToChannel(channel)
+
+      } catch (err) {
+          const e = err as AxiosError<{ error: string }>
+          this.$q.notify({
+            type: 'negative',
+            message: e.response?.data?.error || 'Failed to create channel',
+            position: 'bottom-right'
+          })
+      }
+      
       this.closeModal()
     },
 
@@ -440,7 +489,7 @@ export default defineComponent({
       }
     },
 
-    goToChannel(c: Channel) {
+    goToChannel(c: { id: string | number }) {
       if (this.$route.params.id === c.id) return
       void this.$router.push({ name: 'channel', params: { id: c.id } })
     },
@@ -450,9 +499,17 @@ export default defineComponent({
       this.channelsStore.UPSERT_CHANNEL(joined)
     },
 
-    declineInvite(c: Channel) {
+    async declineInvite(c: Channel) {
       const id = Number(c.id)
-      this.channelsStore.REMOVE_CHANNEL(id)
+      
+      await this.channelsStore.declineInvite(id)
+      
+      this.$q.notify({
+        type: 'info',
+        message: `Declined invitation to ${c.name}`,
+        position: 'bottom-right',
+        timeout: 1000
+      })
     },
 
     handleMessage() {},
@@ -482,26 +539,120 @@ export default defineComponent({
       }
     },
 
-    handleCommand({ command }: { command: string; args: string[] }) {
-      if (this.isSettingsRoute) {
-        if (!command.startsWith('/')) return
+    async handleCommand({ command, args }: { command: string; args: string[] }) {
+      const cmd = command.toLowerCase()
 
-        const name = command.slice(1)
-        switch (name) {
-          case 'list':
-            void this.toggleMembers()
-            break
-          default:
+      if (cmd === 'join') {
+        const [channelName, visibilityArg] = args
+        if (!channelName) {
+          this.$q.notify({ type: 'warning', message: 'Usage: /join channelName [private]' })
+          return
+        }
+        
+        const visibility = visibilityArg === 'private' ? 'private' : 'public'
+        
+        try {
+          const channel = await channelService.joinByName({ name: channelName, visibility })
+          this.channelsStore.UPSERT_CHANNEL(channel)
+          this.goToChannel(channel)
+          this.$q.notify({ type: 'positive', message: `Joined channel ${channel.name}` })
+        } catch (err) {
+          const e = err as AxiosError<{ error: string }>
+          this.$q.notify({ type: 'negative', message: e.response?.data?.error || 'Failed to join' })
         }
         return
       }
 
-      switch (command) {
+      if (!this.activeChannel) {
+        this.$q.notify({ type: 'warning', message: 'You must be in a channel to use this command.' })
+        return
+      }
+      const channelId = Number(this.activeChannel.id)
+
+      switch (cmd) {
         case 'list':
-          if (this.activeChannel) {
-            void this.toggleMembers()
+          void this.toggleMembers()
+          break
+
+        case 'invite': {
+          const [nickname] = args
+          if (!nickname) {
+             this.$q.notify({ type: 'warning', message: 'Usage: /invite nickname' })
+             return
+          }
+          try {
+            const res = await channelService.invite(channelId, { nickname })
+            if (res.invited) {
+                this.$q.notify({ type: 'positive', message: `Invited @${nickname}` })
+            } else {
+                this.$q.notify({ type: 'info', message: res.message || 'User already involved' })
+            }
+          } catch (err) {
+            const e = err as AxiosError<{ error: string }>
+            this.$q.notify({ type: 'negative', message: e.response?.data?.error || 'Invite failed' })
           }
           break
+        }
+
+        case 'kick': {
+          const [nickname] = args
+          if (!nickname) {
+             this.$q.notify({ type: 'warning', message: 'Usage: /kick nickname' })
+             return
+          }
+          try {
+            const res = await channelService.kick(channelId, nickname)
+            if (res.banned) {
+               this.$q.notify({ type: 'positive', message: res.message })
+            } else {
+               this.$q.notify({ type: 'info', message: res.message })
+            }
+          } catch (err) {
+            const e = err as AxiosError<{ error: string }>
+            this.$q.notify({ type: 'negative', message: e.response?.data?.error || 'Kick failed' })
+          }
+          break
+        }
+
+        case 'revoke': {
+          const [nickname] = args
+          if (!nickname) {
+             this.$q.notify({ type: 'warning', message: 'Usage: /revoke nickname' })
+             return
+          }
+          try {
+            await channelService.revoke(channelId, nickname)
+            this.$q.notify({ type: 'positive', message: `Revoked @${nickname}` })
+          } catch (err) {
+            const e = err as AxiosError<{ error: string }>
+            this.$q.notify({ type: 'negative', message: e.response?.data?.error || 'Revoke failed' })
+          }
+          break
+        }
+
+        case 'quit': {
+          if (!this.activeChannel.isAdmin) {
+             this.$q.notify({ type: 'negative', message: 'Only admin can use /quit to delete channel' })
+             return
+          }
+
+          try {
+            await this.channelsStore.deleteChannel(channelId)
+          } catch (err) {
+            const e = err as AxiosError<{ error: string }>
+            this.$q.notify({ type: 'negative', message: e.response?.data?.error || 'Failed to delete' })
+          }
+          break
+        }
+        
+        case 'cancel': {
+            await this.channelsStore.leaveChannel(channelId)
+            void this.$router.push({ name: 'home' })
+            break
+        }
+
+        default:
+          this.$q.notify({ type: 'warning', message: `Unknown command: /${cmd}` })
       }
     },
 

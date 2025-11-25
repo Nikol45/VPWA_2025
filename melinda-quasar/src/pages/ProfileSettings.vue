@@ -379,7 +379,6 @@ export default defineComponent({
         reader.onload = (e) => {
           const previewUrl = e.target?.result as string
           this.user.avatar = previewUrl
-          // Tu je zatiaľ len lokálny preview, nie upload do DB.
         }
         reader.readAsDataURL(file)
       }
@@ -420,7 +419,6 @@ export default defineComponent({
     },
 
     handlePasswordChange() {
-      // Tu môžeš neskôr doplniť API na zmenu hesla
     },
 
     async goAuth() {

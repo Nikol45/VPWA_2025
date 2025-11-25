@@ -4,6 +4,7 @@ import httpServer from '@adonisjs/core/services/server'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
 import Message from '#models/message'
+import CleanupService from '#services/cleanup_service'
 
 export default class WsProvider {
   public static needsApplication = true
@@ -72,8 +73,12 @@ export default class WsProvider {
       }
     })
 
+    CleanupService.start()
+
     this.io.on("connection", (socket: Socket) => {
       const user = socket.data.user as User
+
+      socket.join(`user:${user.id}`)
 
       socket.on('channel:join', ({ channelId }) => {
         const roomName = `channel:${channelId}`

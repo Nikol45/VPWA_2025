@@ -1,4 +1,3 @@
-// melinda-server/start/routes.ts
 import router from '@adonisjs/core/services/router'
 import User from '#models/user'
 import { middleware } from '#start/kernel'
@@ -34,6 +33,7 @@ router
 
     router.post('/:id/invite', '#controllers/channels_controller.invite')
     router.post('/:id/revoke', '#controllers/channels_controller.revoke')
+    router.post('/:id/decline', '#controllers/channels_controller.decline')
 
     router.post('/:id/kick', '#controllers/channels_controller.kick')
     router.post('/:id/ban', '#controllers/channels_controller.ban')

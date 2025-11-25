@@ -9,7 +9,7 @@ interface ChannelError {
 interface CreateChannelPayload {
   name: string
   visibility: ChannelVisibility
-  iconUrl?: string
+  icon?: File | null
 }
 
 export const useChannelsStore = defineStore('channels', {
@@ -30,7 +30,11 @@ export const useChannelsStore = defineStore('channels', {
         const aTime = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0
         const bTime = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0
 
-        return bTime - aTime
+        if (aTime !== bTime) {
+            return bTime - aTime
+        }
+
+        return a.name.localeCompare(b.name)
       })
 
       return sorted
@@ -48,6 +52,13 @@ export const useChannelsStore = defineStore('channels', {
 
     SET_ITEMS(items: Channel[]) {
       this.items = items
+    },
+
+    UPDATE_MEMBER_COUNT(id: number, count: number) {
+      const c = this.items.find((ch) => ch.id === id)
+      if (c) {
+        c.nMembers = count
+      }
     },
 
     UPSERT_CHANNEL(channel: Channel) {
@@ -77,8 +88,14 @@ export const useChannelsStore = defineStore('channels', {
       channel.isMember = true
     },
 
-    declineInvite(id: number) {
-      this.items = this.items.filter((c) => c.id !== id)
+    async declineInvite(id: number) {
+      try {
+        await channelService.decline(id)
+        
+        this.REMOVE_CHANNEL(id)
+      } catch (error) {
+        console.error('Failed to decline invite:', error)
+      }
     },
 
     async fetchChannels() {
@@ -100,10 +117,9 @@ export const useChannelsStore = defineStore('channels', {
       try {
         this.SET_STATUS('pending')
         this.SET_ERRORS([])
-
         const channel = await channelService.create(payload)
+        
         this.UPSERT_CHANNEL(channel)
-
         this.SET_STATUS('success')
         return channel
       } catch (error) {
@@ -114,19 +130,14 @@ export const useChannelsStore = defineStore('channels', {
     },
 
     async leaveChannel(id: number) {
-      try {
-        this.SET_STATUS('pending')
-        this.SET_ERRORS([])
-
-        await channelService.leave(id)
-        this.REMOVE_CHANNEL(id)
-
-        this.SET_STATUS('success')
-      } catch (error) {
-        this.SET_STATUS('error')
-        this.SET_ERRORS([{ message: String(error) }])
-        throw error
-      }
+        try {
+            await channelService.leave(id)
+            this.REMOVE_CHANNEL(id)
+            return true
+        } catch (error) {
+            console.error(error)
+            return false
+        }
     },
 
     async deleteChannel(id: number) {
@@ -144,5 +155,9 @@ export const useChannelsStore = defineStore('channels', {
         throw error
       }
     },
+
+    handleKicked(channelId: number) {
+        this.REMOVE_CHANNEL(channelId)
+    }
   },
 })

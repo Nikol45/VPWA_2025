@@ -3,8 +3,19 @@ import { io } from 'socket.io-client'
 import { useMessageWsStore } from 'src/stores/messages'
 import { useTypingWsStore } from 'src/stores/typing'
 import { usePresenceWsStore } from 'src/stores/presence'
+import { useChannelsStore } from 'src/stores/channels'
 import { authManager } from 'src/services'
+import { Notify } from 'quasar'
 
+interface MemberCountPayload {
+  channelId: number
+  count: number
+}
+
+interface DeletedPayload {
+  channelId: number
+  channelName: string
+}
 
 class WsClient {
   private socket: Socket | null = null
@@ -54,6 +65,7 @@ class WsClient {
     const messageStore = useMessageWsStore()
     const typingStore = useTypingWsStore()
     const presenceStore = usePresenceWsStore()
+    const channelsStore = useChannelsStore()
 
     this.socket.on('message:new', (msg) => {
       messageStore.handleNewMessage(msg)
@@ -73,6 +85,39 @@ class WsClient {
 
     this.socket.on('presence:update', (payload) => {
       presenceStore.handlePresenceUpdate(payload)
+    })
+
+    this.socket.on('channel:kick', (payload: { channelId: number, channelName: string }) => {
+       channelsStore.REMOVE_CHANNEL(payload.channelId)
+       Notify.create({
+         type: 'negative',
+         message: `You have been kicked from ${payload.channelName}.`,
+         position: 'bottom-right'
+       })
+    })
+
+    this.socket.on('channel:invite', (payload: { channelId: number, channelName: string }) => {
+       void channelsStore.fetchChannels()
+       Notify.create({
+         type: 'info',
+         message: `You have been invited to ${payload.channelName}`,
+         position: 'bottom-right'
+       })
+    })
+
+    this.socket.on('channel:deleted', (payload: DeletedPayload) => {
+      const channelsStore = useChannelsStore()
+       channelsStore.REMOVE_CHANNEL(payload.channelId)
+       Notify.create({
+         type: 'warning',
+         message: `Channel "${payload.channelName}" has been closed by the admin.`,
+         position: 'bottom-right'
+       })
+    })
+
+    this.socket.on('channel:update_member_count', (payload: MemberCountPayload) => {
+      const channelsStore = useChannelsStore() 
+      channelsStore.UPDATE_MEMBER_COUNT(payload.channelId, payload.count)
     })
   }
 

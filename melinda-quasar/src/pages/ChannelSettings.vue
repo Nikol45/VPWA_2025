@@ -117,7 +117,8 @@
             :is-admin="isAdmin"
             :is-private="isPrivate"
             :user="member"
-            :buttons="[{ icon: 'remove_circle_outline', action: 'remove' }]"
+            :buttons="getButtonsForMember(member)"
+            @action="(a) => handleMemberAction(a, member)"
           />
         </div>
 
@@ -171,6 +172,7 @@ import InvitePopup from 'src/components/popups/InvitePopup.vue'
 import { useChannelsStore } from 'src/stores/channels'
 import { channelService } from 'src/services'
 import type { Channel, ChannelMember } from 'src/contracts'
+import type { AxiosError } from 'axios'
 
 type VisibilityLabel = 'Public' | 'Private'
 
@@ -230,7 +232,14 @@ export default defineComponent({
 
     activeChannelIcon(): string {
       if (!this.activeChannel) return '/avatars/channels/default.png'
-      return this.activeChannel.iconUrl || '/avatars/channels/default.png'
+      
+      const path = this.activeChannel.iconUrl || '/avatars/channels/default.png'
+
+      if (!path.startsWith('http') && !path.startsWith('data:')) {
+         return `${import.meta.env.VITE_API_URL}${path}`
+      }
+      
+      return path
     },
 
     activeChannelMembers(): Member[] {
@@ -313,7 +322,6 @@ export default defineComponent({
         reader.onload = (e) => {
           const previewUrl = e.target?.result as string
           if (this.activeChannel) {
-            // iba lokálny preview, bez uloženia do backendu
             this.channelsStore.UPSERT_CHANNEL({
               ...this.activeChannel,
               iconUrl: previewUrl,
@@ -365,20 +373,33 @@ export default defineComponent({
       if (!channel) return
 
       try {
-        await channelService.invite(channel.id, { nickname })
-        this.$q.notify({
-          type: 'positive',
-          message: `Invite sent to @${nickname}`,
-          position: 'bottom-right',
-          timeout: 2000,
-        })
-      } catch {
-        this.$q.notify({
-          type: 'negative',
-          message: `Failed to invite @${nickname}`,
-          position: 'bottom-right',
-          timeout: 2000,
-        })
+        const result = await channelService.invite(channel.id, { nickname }) 
+        
+        if (result.invited) {
+            this.$q.notify({
+              type: 'positive',
+              message: `Invite sent to @${nickname}`,
+              position: 'bottom-right',
+              timeout: 2000,
+            })
+        } else {
+            this.$q.notify({
+              type: 'warning',
+              message: `@${nickname} is already a member or invited`,
+              position: 'bottom-right',
+              timeout: 2000,
+            })
+        }
+      } catch (err) {
+        const e = err as AxiosError<{ error: string }>
+        if (e.response && e.response.status === 404) {
+             this.$q.notify({
+              type: 'negative',
+              message: `User @${nickname} not found`,
+              position: 'bottom-right',
+              timeout: 2000,
+            })
+        }
       }
     },
 
@@ -403,6 +424,49 @@ export default defineComponent({
           timeout: 1500,
         })
       }
+    },
+
+    getButtonsForMember(member: Member) {
+          if (member.id === this.currentUser.id) return [] 
+
+          if (this.isPrivate) {
+              return this.isAdmin ? [{ icon: 'remove_circle_outline', action: 'remove' }] : []
+          }
+
+          if (member.role === 'admin') return []
+          
+          return [{ icon: 'remove_circle_outline', action: 'remove' }]
+    },
+
+    async handleMemberAction(action: string, member: Member) {
+          if (action !== 'remove') return
+          const channelId = this.activeChannel?.id
+          if (!channelId) return
+
+          const id = Number(channelId)
+
+          if (this.isAdmin) {
+              try {
+                  if (this.isPrivate) {
+                      await channelService.revoke(id, member.nickname)
+                  } else {
+                      await channelService.ban(id, member.nickname)
+                  }
+                  this.$q.notify({ type: 'positive', message: `Removed ${member.nickname}` })
+                  void this.fetchMembers(id) 
+              } catch {
+                  this.$q.notify({ type: 'negative', message: 'Failed to remove user' })
+              }
+          } else {
+              try {
+                  await channelService.kick(id, member.nickname)
+                  this.$q.notify({ type: 'positive', message: `Voted to kick ${member.nickname}` })
+              } catch (err) {
+                const e = err as AxiosError<{ error: string }>
+                  const msg = e.response?.data?.error || 'Failed to vote'
+                  this.$q.notify({ type: 'warning', message: msg })
+              }
+          }
     },
   },
 })
