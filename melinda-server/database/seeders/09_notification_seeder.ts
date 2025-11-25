@@ -3,169 +3,151 @@ import Notification from '#models/notification'
 
 export default class NotificationSeeder extends BaseSeeder {
   async run() {
-     await Notification.createMany([
-      // ------------------------------------------------------
-      // USER 5 — kickvote, invite, ban
-      // ------------------------------------------------------
+    await Notification.createMany([
+      // ========================
+      // Kickvote o Burinovi (cieľ: Filip "businessman")
+      // ========================
+
+      // 1) Juraj (diktator) spustil kickvote na Burina v kanáli Slováci na Mladosti
       {
-        userId: 5,
+        userId: 7, // Filip "businessman"
         senderType: 'user',
-        senderId: 1, // Nikol
+        senderId: 13, // Juraj "diktator"
         isRead: false,
-        text: 'Bol vytvorený kickvote o vašom vyhodení z kanála Slováci na Mladosti.',
+        text: 'Používateľ diktator spustil hlasovanie o vašom odstránení z kanála Slováci na Mladosti.',
       },
+      // 2) Hlas Juraja v kickvote
       {
-        userId: 5,
-        senderType: 'channel',
-        senderId: 8,
-        isRead: false,
-        text: 'Boli ste pozvaná do kanála Študovňa.',
-      },
-      {
-        userId: 5,
-        senderType: 'channel',
-        senderId: 1,
-        isRead: false,
-        text: 'Boli ste zabanovaná v kanáli Slováci na Mladosti.',
-      },
-
-      // Single unread message example (real preview)
-      {
-        userId: 5,
+        userId: 7, // Filip "businessman"
         senderType: 'user',
-        senderId: 4, // Simča
+        senderId: 13, // Juraj "diktator"
         isRead: false,
-        text: 'Simča: "Nie je to too much?" (Ženy na FIIT)',
+        text: 'V hlasovaní o vašom odstránení z kanála Slováci na Mladosti pribudol nový hlas.',
       },
-
-      // ------------------------------------------------------
-      // USER 1 — Nikol
-      // ------------------------------------------------------
-
-      // Multiple unread messages summary
+      // 3) Hlas Tomáša (zuzenka) v kickvote
       {
-        userId: 1,
-        senderType: 'channel',
-        senderId: 3, // FIITka
-        isRead: false,
-        text: 'Máte 4 neprečítané správy v kanáli FIITka.',
-      },
-
-      // Single unread message (message preview)
-      {
-        userId: 1,
+        userId: 7, // Filip "businessman"
         senderType: 'user',
-        senderId: 4, // Simča
+        senderId: 12, // Tomáš "zuzenka"
         isRead: false,
-        text: 'Simča: "maybeee 🥺" (Ženy na FIIT)',
+        text: 'V hlasovaní o vašom odstránení z kanála Slováci na Mladosti pribudol nový hlas.',
       },
 
-      {
-        userId: 1,
-        senderType: 'channel',
-        senderId: 2,
-        isRead: false,
-        text: 'Máte 3 neprečítané správy v kanáli Tretiačikovia.',
-      },
+      // ========================
+      // Mentiony – Slováci na Mladosti (channel_id = 1)
+      // ========================
 
-      // ------------------------------------------------------
-      // USER 2 — FireFly
-      // ------------------------------------------------------
+      // Juraj pingne Firefly: '@firefly96 daj mu ban'
       {
-        userId: 2,
-        senderType: 'channel',
-        senderId: 1,
-        isRead: false,
-        text: 'Máte 5 neprečítaných správ v kanáli Slováci na Mladosti.',
-      },
-      {
-        userId: 2,
+        userId: 2, // Svetlana "firefly96"
         senderType: 'user',
-        senderId: 4,
+        senderId: 13, // Juraj "diktator"
         isRead: false,
-        text: 'Simča: "Môže byť? @Firefly" (Ženy na FIIT)',
+        text: 'Používateľ diktator vás spomenul v kanáli Slováci na Mladosti.',
       },
+      // Juraj pingne Firefly: '@firefly daj mu ban už fakt'
       {
-        userId: 2,
-        senderType: 'channel',
-        senderId: 3,
+        userId: 2, // Svetlana "firefly96"
+        senderType: 'user',
+        senderId: 13, // Juraj "diktator"
         isRead: false,
-        text: 'Máte 2 neprečítané správy v kanáli FIITka.',
+        text: 'Používateľ diktator vás spomenul v kanáli Slováci na Mladosti.',
+      },
+      // Riško (tetris) mention na Firefly: 'Ja si dám kľudne tiež' (mentions: [2])
+      {
+        userId: 2, // Svetlana "firefly96"
+        senderType: 'user',
+        senderId: 11, // Richard "tetris"
+        isRead: false,
+        text: 'Používateľ tetris vás spomenul v kanáli Slováci na Mladosti.',
+      },
+      // Riško pingne Firefly v IBAN správe
+      {
+        userId: 2, // Svetlana "firefly96"
+        senderType: 'user',
+        senderId: 11, // Richard "tetris"
+        isRead: false,
+        text: 'Používateľ tetris vás spomenul v kanáli Slováci na Mladosti.',
+      },
+      // Riško pingne Juraja v IBAN správe
+      {
+        userId: 13, // Juraj "diktator"
+        senderType: 'user',
+        senderId: 11, // Richard "tetris"
+        isRead: false,
+        text: 'Používateľ tetris vás spomenul v kanáli Slováci na Mladosti.',
       },
 
-      // ------------------------------------------------------
-      // USER 3 — Svatec
-      // ------------------------------------------------------
+      // ========================
+      // Mentiony – League of Legends (public) (channel_id = 5)
+      // ========================
+
+      // Firefly pingne @tetris
       {
-        userId: 3,
-        senderType: 'channel',
-        senderId: 6, // Marvel Rivals
-        isRead: false,
-        text: 'Máte 3 neprečítané správy v kanáli Marvel Rivals.',
-      },
-      {
-        userId: 3,
+        userId: 11, // Richard "tetris"
         senderType: 'user',
-        senderId: 1,
+        senderId: 2, // Svetlana "firefly96"
         isRead: false,
-        text: 'Nikol: "Idem do študovne, kto sa pridá?" (Študovňa)',
+        text: 'Používateľ firefly96 vás spomenul v kanáli League of Legends (public).',
       },
+      // Firefly pingne @kivin
       {
-        userId: 3,
-        senderType: 'channel',
-        senderId: 8,
+        userId: 8, // Šimon "kivin"
+        senderType: 'user',
+        senderId: 2, // Svetlana "firefly96"
         isRead: false,
-        text: 'Máte 2 neprečítané správy v kanáli Študovňa.',
+        text: 'Používateľ firefly96 vás spomenul v kanáli League of Legends (public).',
       },
 
-      // ------------------------------------------------------
-      // USER 4 — Simča
-      // ------------------------------------------------------
+      // ========================
+      // Mention – Spotify – random ľudia (channel_id = 7)
+      // ========================
+
+      // Jakub pingne @betka
       {
-        userId: 4,
-        senderType: 'channel',
-        senderId: 4,
-        isRead: false,
-        text: 'Máte 6 neprečítaných správ v kanáli Ženy na FIIT.',
-      },
-      {
-        userId: 4,
+        userId: 5, // Alžbeta "betka"
         senderType: 'user',
-        senderId: 1,
+        senderId: 18, // Jakub "jakub_velky"
         isRead: false,
-        text: 'Nikol: "aaa vyzerá to perfektne 🔥" (Ženy na FIIT)',
-      },
-      {
-        userId: 4,
-        senderType: 'channel',
-        senderId: 2,
-        isRead: false,
-        text: 'Máte 2 neprečítané správy v kanáli Tretiačikovia.',
+        text: 'Používateľ jakub_velky vás spomenul v kanáli Spotify – random ľudia.',
       },
 
-      // ------------------------------------------------------
-      // USER 6 — Lukáš
-      // ------------------------------------------------------
+      // ========================
+      // Mention – ICP – BudgetBuddy (channel_id = 8)
+      // ========================
+
+      // Firefly pingne @jakub_velky
       {
-        userId: 6,
-        senderType: 'channel',
-        senderId: 7,
-        isRead: false,
-        text: 'Máte 3 neprečítané správy v kanáli League of Legends.',
-      },
-      {
-        userId: 6,
+        userId: 18, // Jakub "jakub_velky"
         senderType: 'user',
-        senderId: 2,
+        senderId: 2, // Svetlana "firefly96"
         isRead: false,
-        text: 'FireFly: "Ak nebudeš intovať, tak idem 😂" (League of Legends)',
+        text: 'Používateľ firefly96 vás spomenul v kanáli ICP – BudgetBuddy.',
       },
+
+      // ========================
+      // Pozvánka – Ženy na FIIT (channel_id = 4)
+      // ========================
+
+      // Nikol pozve Alžbetu do kanála Ženy na FIIT
       {
-        userId: 6,
-        senderType: 'channel',
-        senderId: 6,
+        userId: 5, // Alžbeta "betka"
+        senderType: 'user',
+        senderId: 1, // Nikol "nikol45"
         isRead: false,
-        text: 'Máte 4 neprečítané správy v kanáli Marvel Rivals.',
+        text: 'Používateľ nikol45 vás pozval do kanála Ženy na FIIT.',
+      },
+
+      // ========================
+      // Ban – Ženy na FIIT (Žofia bola odstránená Nikol)
+      // ========================
+
+      {
+        userId: 19, // Žofia
+        senderType: 'user',
+        senderId: 1, // Nikol "nikol45"
+        isRead: false,
+        text: 'Boli ste odstránení z kanála Ženy na FIIT adminom.',
       },
     ])
   }

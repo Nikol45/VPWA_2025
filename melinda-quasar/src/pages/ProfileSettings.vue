@@ -209,7 +209,7 @@ export default defineComponent({
         { id: 'lilac' as UserTheme, name: 'Lilac dream', preview: '/themes/gradient_lilac.png' },
         { id: 'midnight' as UserTheme, name: 'Midnight blue', preview: '/themes/gradient_blue.png' },
         {
-          id: 'pink_chocolate' as UserTheme,
+          id: 'chocolate' as UserTheme,
           name: 'Pink chocolate',
           preview: '/themes/gradient_choco.png',
         },

@@ -20,7 +20,7 @@ export interface LoginCredentials {
   password: string
 }
 
-export type UserTheme = 'lilac' | 'midnight' | 'pink_chocolate' | 'forest'
+export type UserTheme = 'lilac' | 'midnight' | 'chocolate' | 'forest'
 export type UserStatus = 'online' | 'dnd' | 'offline'
 export type NotificationSetting = 'show_all' | 'mentions_only' | 'mute_all'
 

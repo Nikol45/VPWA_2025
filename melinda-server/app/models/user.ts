@@ -93,7 +93,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare password: string
 
   @column()
-  declare theme: 'lilac' | 'midnight' | 'pink_chocolate' | 'forest'
+  declare theme: 'lilac' | 'midnight' | 'chocolate' | 'forest'
 
   @column()
   declare avatarUrl: string

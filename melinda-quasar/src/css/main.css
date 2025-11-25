@@ -47,7 +47,7 @@
   --c-5: var(--b-5);
 }
 
-:root[theme="pink_chocolate"] {
+:root[theme="chocolate"] {
   --c-1: var(--p-1);
   --c-2: var(--p-2);
   --c-3: var(--p-3);

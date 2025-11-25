@@ -12,7 +12,7 @@ export default class Users extends BaseSchema {
       table.string('email', 255).notNullable()
       table.string('password', 255).notNullable()
       table
-        .enum('theme', ['lilac', 'midnight', 'pink_chocolate', 'forest'])
+        .enum('theme', ['lilac', 'midnight', 'chocolate', 'forest'])
         .notNullable()
         .defaultTo('lilac')
       table.string('avatar_url', 2048).notNullable().defaultTo('/avatars/users/default.png')
