@@ -6,7 +6,7 @@
           <div class="row items-center q-gutter-md">
             <div class="relative-position">
               <q-avatar size="64px">
-                <img :src="user.avatar" />
+                <img :src="resolvedAvatar" />
               </q-avatar>
               <q-icon
                 name="circle"
@@ -246,6 +246,16 @@ export default defineComponent({
         default:
           return 'grey'
       }
+    },
+
+    resolvedAvatar(): string {
+      const path = this.user.avatar || '/avatars/users/default.png'
+
+      if (path.startsWith('http') || path.startsWith('data:')) {
+        return path
+      }
+
+      return `${import.meta.env.VITE_API_URL}${path}`
     },
   },
 
