@@ -8,7 +8,7 @@ import User from '#models/user'
 import { CreateChannelValidator } from '#validators/create_channel'
 import { JoinChannelValidator } from '#validators/join_channel'
 import { ChannelNicknameActionValidator } from '#validators/channel_nickname_action'
-import { emitToUser, emitChannelDeleted, emitMemberCountUpdate } from '#services/ws_events'
+import { emitToUser, emitMemberCountUpdate } from '#services/ws_events'
 
 interface ChannelResponse {
   id: number
@@ -27,6 +27,27 @@ interface ChannelResponse {
 }
 
 export default class ChannelsController {
+
+  private async generateUniqueInviteCode(): Promise<string> {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+
+    function gen() {
+      let out = ''
+      for (let i = 0; i < 8; i++) {
+        out += chars.charAt(Math.floor(Math.random() * chars.length))
+      }
+      return out
+    }
+
+    let code = gen()
+    
+    while (await Channel.findBy('inviteCode', code)) {
+      code = gen()
+    }
+
+    return code
+  }
+
   private async deleteInactiveChannels() {
     const threshold = DateTime.now().minus({ days: 30 })
 
@@ -128,6 +149,7 @@ export default class ChannelsController {
 
         iconUrl = `/avatars/channels/${fileName}`
     }
+    const uniqueCode = await this.generateUniqueInviteCode()
 
     const channel = await Channel.create({
       name: payload.name,
@@ -135,7 +157,7 @@ export default class ChannelsController {
       visibility: payload.visibility,
       nMembers: 1,
       adminId: user.id,
-      inviteCode: Math.random().toString(36).substring(2, 10),
+      inviteCode: uniqueCode,
       lastMessageAt: DateTime.now(),
     })
 
@@ -160,13 +182,14 @@ export default class ChannelsController {
     if (!existing) {
       const visibility = payload.visibility ?? 'public'
 
+      const uniqueCode = await this.generateUniqueInviteCode()
       const channel = await Channel.create({
         name: payload.name,
-        iconUrl: '',
+        iconUrl: '/avatars/channels/default_channel.jpg',
         visibility,
         nMembers: 1,
         adminId: user.id,
-        inviteCode: '',
+        inviteCode: uniqueCode,
         lastMessageAt: DateTime.now(),
       })
 
@@ -194,6 +217,17 @@ export default class ChannelsController {
       return response.forbidden({ error: 'You are banned from this channel' })
     }
 
+    if (channel.visibility === 'private') {
+        const isMemberCheck = await channel.related('members').query().where('users.id', user.id).first()
+        const hasInvitation = await channel.related('invitations').query().where('users.id', user.id).first()
+        
+        if (!isMemberCheck && !hasInvitation) {
+            return response.forbidden({ error: 'Cannot join a private channel without invitation' })
+        }
+    }
+
+    await channel.related('invitations').detach([user.id])
+
     const isMember = await channel
       .related('members')
       .query()
@@ -208,21 +242,6 @@ export default class ChannelsController {
         isInvited: false,
         isAdmin: channel.adminId === user.id,
       } as ChannelResponse
-    }
-
-    if (channel.visibility === 'private') {
-      const hasInvitation = await channel
-        .related('invitations')
-        .query()
-        .where('users.id', user.id)
-        .first()
-
-      if (!hasInvitation) {
-        return response.forbidden({
-          error: 'Cannot join a private channel without invitation',
-        })
-      }
-      await channel.related('invitations').detach([user.id])
     }
 
       await channel.related('members').attach([user.id])
@@ -279,6 +298,7 @@ export default class ChannelsController {
     }
 
     await channel.related('members').detach([user.id])
+    await channel.related('invitations').detach([user.id])
 
     channel.nMembers = Math.max(channel.nMembers - 1, 0)
     await channel.save()
@@ -337,14 +357,16 @@ export default class ChannelsController {
     if (isMember) return { success: true, invited: false, message: 'User is already a member' }
 
     const alreadyInvited = await channel.related('invitations').query().where('users.id', target.id).first()
-    if (!alreadyInvited) {
-      await channel.related('invitations').attach([target.id])
-      
-      await emitToUser(target.id, 'channel:invite', { 
-          channelId: channel.id,
-          channelName: channel.name 
-      })
+    if (alreadyInvited) {
+      return { success: true, invited: false, message: 'User is already invited' }
     }
+
+    await channel.related('invitations').attach([target.id])
+    
+    await emitToUser(target.id, 'channel:invite', { 
+        channelId: channel.id,
+        channelName: channel.name 
+    })
 
     return { success: true, invited: true }
   }

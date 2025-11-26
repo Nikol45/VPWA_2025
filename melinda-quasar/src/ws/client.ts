@@ -69,6 +69,7 @@ class WsClient {
 
     this.socket.on('message:new', (msg) => {
       messageStore.handleNewMessage(msg)
+      window.dispatchEvent(new CustomEvent('chat:message', { detail: msg }))
     })
 
     this.socket.on('typing:state', (payload) => {

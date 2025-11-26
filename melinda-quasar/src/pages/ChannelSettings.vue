@@ -58,10 +58,11 @@
 
         <div class="row justify-between q-mt-lg">
           <q-btn
+            v-if="!isAdmin"
             flat
             no-caps
             size="13px"
-            class="col negative q-pa-sm q-mr-sm text-weight-bold text-c-1"
+            class="col negative q-pa-sm text-weight-bold text-c-1"
             @click="confirmLeave = true"
           >
             Leave channel
@@ -71,7 +72,7 @@
             flat
             no-caps
             size="13px"
-            class="col negative q-pa-sm q-ml-sm text-weight-bold text-c-1"
+            class="col negative q-pa-sm text-weight-bold text-c-1"
             @click="confirmClose = true"
           >
             Close channel
@@ -173,6 +174,8 @@ import { useChannelsStore } from 'src/stores/channels'
 import { channelService } from 'src/services'
 import type { Channel, ChannelMember } from 'src/contracts'
 import type { AxiosError } from 'axios'
+import { useAuthStore } from 'src/stores/auth'
+
 
 type VisibilityLabel = 'Public' | 'Private'
 
@@ -217,8 +220,9 @@ export default defineComponent({
   },
 
   setup() {
+    const authStore = useAuthStore()
     const channelsStore = useChannelsStore()
-    return { channelsStore }
+    return { authStore, channelsStore }
   },
 
   computed: {
@@ -278,6 +282,14 @@ export default defineComponent({
         void this.fetchMembers(channel.id)
       },
     },
+
+    'activeChannel.nMembers': {
+      handler() {
+        if (this.activeChannel) {
+          void this.fetchMembers(this.activeChannel.id)
+        }
+      }
+    }
   },
 
   methods: {
@@ -392,14 +404,14 @@ export default defineComponent({
         }
       } catch (err) {
         const e = err as AxiosError<{ error: string }>
-        if (e.response && e.response.status === 404) {
-             this.$q.notify({
-              type: 'negative',
-              message: `User @${nickname} not found`,
-              position: 'bottom-right',
-              timeout: 2000,
-            })
-        }
+        const msg = e.response?.data?.error || `Failed to invite @${nickname}`
+
+        this.$q.notify({
+          type: 'negative',
+          message: msg, 
+          position: 'bottom-right',
+          timeout: 2500,
+      })
       }
     },
 
@@ -427,7 +439,11 @@ export default defineComponent({
     },
 
     getButtonsForMember(member: Member) {
-          if (member.id === this.currentUser.id) return [] 
+          if (member.id === this.authStore.user?.id) return [] 
+
+          if (this.isPrivate) {
+              return this.isAdmin ? [{ icon: 'remove_circle_outline', action: 'remove' }] : []
+          }
 
           if (this.isPrivate) {
               return this.isAdmin ? [{ icon: 'remove_circle_outline', action: 'remove' }] : []
@@ -459,8 +475,8 @@ export default defineComponent({
               }
           } else {
               try {
-                  await channelService.kick(id, member.nickname)
-                  this.$q.notify({ type: 'positive', message: `Voted to kick ${member.nickname}` })
+                  const res = await channelService.kick(id, member.nickname)
+                  this.$q.notify({ type: 'info', message: res.message })
               } catch (err) {
                 const e = err as AxiosError<{ error: string }>
                   const msg = e.response?.data?.error || 'Failed to vote'

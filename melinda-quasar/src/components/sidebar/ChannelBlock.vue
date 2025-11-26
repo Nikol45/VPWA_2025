@@ -11,8 +11,8 @@
       </q-avatar>
     </q-item-section>
 
-    <q-item-section>
-      <q-item-label class="text-body1">{{ channel.name }}</q-item-label>
+    <q-item-section class="channel-main">
+      <q-item-label class="text-body1 ellipsis">{{ channel.name }}</q-item-label>
       <q-item-label class="text-caption text-weight-thin">
         {{ channel.members }} members
       </q-item-label>
@@ -85,6 +85,10 @@ export default defineComponent({
 
 .invited-bg {
   background-color: rgba(255, 255, 255, 0.05);
+}
+
+.channel-main {
+  width: 100px;
 }
 
 </style>

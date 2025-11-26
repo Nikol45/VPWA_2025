@@ -84,7 +84,6 @@
           const myId = this.authStore.user?.id
           if (member.id === myId) return []
 
-    
           if (this.isPrivate) {
               return this.isAdmin ? [{ icon: 'remove_circle_outline', action: 'remove' }] : []
           }
@@ -114,8 +113,8 @@
               }
           } else {
               try {
-                  await channelService.kick(channelId, member.nickname)
-                  this.$q.notify({ type: 'positive', message: `Voted to kick ${member.nickname}` })
+                  const res = await channelService.kick(channelId, member.nickname)
+                  this.$q.notify({ type: 'info', message: res.message })
               } catch (err) {
                   const e = err as AxiosError<{ error: string }>
                   const msg = e.response?.data?.error || 'Failed to vote'

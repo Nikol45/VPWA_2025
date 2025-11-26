@@ -249,13 +249,13 @@ export default defineComponent({
     },
 
     resolvedAvatar(): string {
-      const path = this.user.avatar || '/avatars/users/default.png'
-
-      if (path.startsWith('http') || path.startsWith('data:')) {
-        return path
-      }
-
-      return `${import.meta.env.VITE_API_URL}${path}`
+        const path = this.user.avatar || '/avatars/users/default.png'
+        
+        if (path.startsWith('http') || path.startsWith('data:')) {
+            return path
+        }
+        
+        return `${import.meta.env.VITE_API_URL}${path}`
     },
   },
 

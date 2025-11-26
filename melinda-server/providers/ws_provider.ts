@@ -5,6 +5,8 @@ import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
 import Message from '#models/message'
 import CleanupService from '#services/cleanup_service'
+import Notification from '#models/notification'
+import Channel from '#models/channel'
 
 export default class WsProvider {
   public static needsApplication = true
@@ -23,6 +25,18 @@ export default class WsProvider {
 
   async boot() {}
   async start() {}
+
+  private extractMentions(text: string): string[] {
+    const regex = /@([A-Za-z0-9_]+)/g
+    const nicknames = new Set<string>()
+    let match: RegExpExecArray | null
+
+    while ((match = regex.exec(text)) !== null) {
+      nicknames.add(match[1])
+    }
+
+    return Array.from(nicknames)
+  }
 
   async ready() {
     const nodeServer = httpServer.getNodeServer()
@@ -75,10 +89,15 @@ export default class WsProvider {
 
     CleanupService.start()
 
-    this.io.on("connection", (socket: Socket) => {
+    this.io.on("connection", async (socket: Socket) => {
       const user = socket.data.user as User
 
       socket.join(`user:${user.id}`)
+      const userChannels = await user.related('channels').query()
+      userChannels.forEach(channel => {
+          socket.join(`channel:${channel.id}`)
+      })
+
 
       socket.on('channel:join', ({ channelId }) => {
         const roomName = `channel:${channelId}`
@@ -92,11 +111,40 @@ export default class WsProvider {
 
       socket.on('message:create', async (payload) => {
         try {
+
+            const nicknamesRaw = this.extractMentions(payload.text)
+            let mentionIds: number[] = []
+
+            if (nicknamesRaw.length > 0) {
+                const users = await User.query().whereIn('nickname', nicknamesRaw)
+                mentionIds = users.map(u => u.id)
+            }
+
             const message = await Message.create({
                 text: payload.text,
                 channelId: payload.channelId,
-                userId: user.id
+                userId: user.id,
+                mentions: mentionIds
             })
+
+            if (mentionIds.length > 0) {
+                const channel = await Channel.find(payload.channelId)
+                if (channel) {
+                    const notifications = mentionIds
+                        .filter(id => id !== user.id)
+                        .map(targetId => ({
+                            userId: targetId,
+                            senderType: 'user' as const,
+                            senderId: user.id,
+                            isRead: false,
+                            text: `Mentioned you in ${channel.name}: ${message.text.substring(0, 50)}...`
+                        }))
+                    
+                    if (notifications.length > 0) {
+                         await Notification.createMany(notifications)
+                    }
+                }
+            }
 
             const broadcastMessage = {
                 id: message.id,
@@ -104,7 +152,7 @@ export default class WsProvider {
                 channelId: message.channelId,
                 userId: message.userId,
                 createdAt: message.createdAt.toISO(),
-                mentions: [], 
+                mentions: mentionIds,
                 
                 user: {
                     id: user.id,

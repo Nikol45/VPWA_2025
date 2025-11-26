@@ -9,7 +9,7 @@ export default class Messages extends BaseSchema {
       table.integer('user_id').notNullable().references('id').inTable('users').onDelete('CASCADE')
       table.integer('channel_id').notNullable().references('id').inTable('channels').onDelete('CASCADE')
       table.jsonb('mentions').notNullable().defaultTo([])
-      table.string('text', 2000).notNullable()
+      table.string('text', 500).notNullable()
       table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
     })
   }

@@ -14,10 +14,8 @@ class UserService {
     return response.data
   }
 
-  async updateNotificationSetting(
-    notificationSetting: User['notificationSetting']
-  ): Promise<User> {
-    const response = await api.patch<User>('me/notifications', { notificationSetting })
+  async updateNotificationSetting(setting: string) {
+    const response = await api.patch('me/notifications', { setting })
     return response.data
   }
 

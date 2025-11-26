@@ -136,6 +136,8 @@
   <MembersPopup
     v-model="showMembers"
     :members="activeMembers"
+    :is-admin="activeChannel?.isAdmin || false"
+    :is-private="activeChannel?.private || false"
   />
 </template>
 
@@ -318,7 +320,7 @@ export default defineComponent({
     },
 
     isSettingsRoute(): boolean {
-      return this.$route.path.startsWith('/home/settings')
+      return this.$route.name === 'profile-settings' || this.$route.name === 'channel-settings'
     },
   },
 
@@ -343,7 +345,7 @@ export default defineComponent({
 
     activeChannel: {
       async handler(newVal) {
-        if (newVal && this.showMembers) {
+        if (newVal) {
           await this.loadMembers(newVal.id)
         }
 
@@ -363,6 +365,12 @@ export default defineComponent({
         if (this.showMembers && this.activeChannel) {
            void this.loadMembers(this.activeChannel.id)
         }
+      },
+    },
+
+    showMembers(isOpen: boolean) {
+      if (isOpen && this.activeChannel) {
+        void this.loadMembers(this.activeChannel.id)
       }
     },
 
@@ -398,7 +406,14 @@ export default defineComponent({
       const id = Number(channelId)
       if (!id) return
       const members = await channelService.listMembers(id)
-      this.membersByChannel[channelId] = members as unknown as Member[]
+      this.membersByChannel[channelId] = members.map(m => ({
+        id: m.id,
+        nickname: m.nickname,
+        name: `${m.firstName} ${m.lastName}`,
+        avatarUrl: m.avatarUrl || '/avatars/users/default.png',
+        status: m.status,
+        role: m.isAdmin ? 'admin' : ''
+      }))
     },
 
     onDialogModel(
