@@ -1,41 +1,42 @@
 import { defineStore } from 'pinia'
 
 interface PresenceUpdatePayload {
-  userId: number
-  status: 'online' | 'offline' | 'dnd'
+    userId: number
+    status: 'online' | 'offline' | 'dnd'
 }
 
 interface UserJoinedPayload {
-  user: {
-    id: number
-    status: 'online' | 'offline' | 'dnd'
-  }
+    user: {
+        id: number
+        status: 'online' | 'offline' | 'dnd'
+    }
 }
 
 interface UserLeftPayload {
-  userId: number
+    userId: number
 }
 
 export const usePresenceWsStore = defineStore('presence-ws', {
-  state: () => ({
-    presentUsers: {} as Record<number, 'online' | 'offline' | 'dnd'>
-  }),
+    state: () => ({
 
-  actions: {
-    handlePresenceUpdate(payload: PresenceUpdatePayload) {
-      this.presentUsers[payload.userId] = payload.status
-    },
+        statuses: {} as Record<number, 'online' | 'offline' | 'dnd'>
+    }),
 
-    handleUserJoined(payload: UserJoinedPayload) {
-      this.presentUsers[payload.user.id] = payload.user.status
-    },
+    actions: {
+        handlePresenceUpdate(payload: PresenceUpdatePayload) {
+            this.statuses[payload.userId] = payload.status
+        },
 
-    handleUserLeft(payload: UserLeftPayload) {
-      this.presentUsers[payload.userId] = 'offline'
-    },
+        handleUserJoined(payload: UserJoinedPayload) {
+            this.statuses[payload.user.id] = payload.user.status
+        },
 
-    getStatus(userId: number) {
-      return this.presentUsers[userId] || 'offline'
+        handleUserLeft(payload: UserLeftPayload) {
+            this.statuses[payload.userId] = 'offline'
+        },
+
+        getStatus(userId: number) {
+            return this.statuses[userId] || 'offline'
+        }
     }
-  }
 })

@@ -208,16 +208,9 @@ export default defineComponent({
       themes: [
         { id: 'lilac' as UserTheme, name: 'Lilac dream', preview: '/themes/gradient_lilac.png' },
         { id: 'midnight' as UserTheme, name: 'Midnight blue', preview: '/themes/gradient_blue.png' },
-        {
-          id: 'chocolate' as UserTheme,
-          name: 'Pink chocolate',
-          preview: '/themes/gradient_choco.png',
-        },
-        {
-          id: 'forest' as UserTheme,
-          name: 'Mystical forest',
-          preview: '/themes/gradient_forest.png',
-        },
+        { id: 'chocolate' as UserTheme, name: 'Dark chocolate', preview: '/themes/gradient_choco.png', },
+        { id: 'forest' as UserTheme, name: 'Mystical forest', preview: '/themes/gradient_forest.png', },
+        { id: 'rose' as UserTheme, name: 'Rose blossom', preview: '/themes/gradient_rose.png', },
       ],
 
       statusOptions: [
@@ -250,11 +243,11 @@ export default defineComponent({
 
     resolvedAvatar(): string {
         const path = this.user.avatar || '/avatars/users/default.png'
-        
+
         if (path.startsWith('http') || path.startsWith('data:')) {
             return path
         }
-        
+
         return `${import.meta.env.VITE_API_URL}${path}`
     },
   },

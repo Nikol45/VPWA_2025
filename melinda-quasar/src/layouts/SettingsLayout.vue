@@ -6,8 +6,6 @@
         <div class="row items-center">
           <p class="text-h5 text-weight-bolder text-c-1 q-mb-none">Profile settings</p>
         </div>
-        <q-space />
-        <q-btn flat round dense icon="notifications_none" class="q-mr-sm" />
       </q-toolbar>
     </q-header>
 

@@ -3,6 +3,7 @@ import { UpdateStatusValidator } from '#validators/update_status'
 import { UpdateThemeValidator } from '#validators/update_theme'
 import { UpdateProfileValidator } from '#validators/update_profile'
 import vine from '@vinejs/vine'
+import app from '@adonisjs/core/services/app'
 
 export default class UsersController {
   public async updateStatus({ auth, request }: HttpContext) {
@@ -12,24 +13,30 @@ export default class UsersController {
     user.status = payload.status
     await user.save()
 
+    const io = await app.container.make('ws')
+    io.emit('presence:update', {
+      userId: user.id,
+      status: user.status
+    })
+
     return user
   }
 
   public async updateNotificationSetting({ auth, request }: HttpContext) {
-        const user = auth.user!
-        
-        const schema = vine.compile(
-            vine.object({
-                setting: vine.enum(['show_all', 'mentions_only', 'mute_all'])
-            })
-        )
-        const payload = await request.validateUsing(schema)
+    const user = auth.user!
 
-        user.notificationSetting = payload.setting as any
-        await user.save()
+    const schema = vine.compile(
+      vine.object({
+        setting: vine.enum(['show_all', 'mentions_only', 'mute_all'])
+      })
+    )
+    const payload = await request.validateUsing(schema)
 
-        return { notificationSetting: user.notificationSetting }
-    }
+    user.notificationSetting = payload.setting as any
+    await user.save()
+
+    return { notificationSetting: user.notificationSetting }
+  }
 
   public async updateTheme({ auth, request }: HttpContext) {
     const user = auth.user!

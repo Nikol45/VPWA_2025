@@ -8,7 +8,11 @@
 
       <q-card-section class="member-area q-pt-none q-mt-sm">
         <q-scroll-area class="fit">
-            <div v-for="member in members" :key="member.id" class="member-item c-5 q-mb-md row justify-between items-center">
+            <div
+                v-for="member in sortedMembers"
+                :key="member.id"
+                class="member-item c-5 q-mb-md row justify-between items-center"
+            >
               <profile-block class="member-item fit" :user="member" :is-admin="isAdmin" :is-private="isPrivate" :buttons="getButtonsForMember(member)" @action="(a) => handleMemberAction(a, member)"/>
             </div>
         </q-scroll-area>
@@ -76,6 +80,18 @@
       }
     },
 
+    computed: {
+      sortedMembers(): Member[] {
+          const admin = this.members.find(m => m.role === 'admin')
+
+          const others = this.members
+              .filter(m => m.role !== 'admin')
+              .sort((a, b) => a.name.localeCompare(b.name))
+
+          return admin ? [admin, ...others] : others
+      }
+    },
+
     methods: {
       closePopup() {
         this.localShow = false
@@ -89,7 +105,7 @@
           }
 
           if (member.role === 'admin') return []
-          
+
           return [{ icon: 'remove_circle_outline', action: 'remove' }]
       },
 

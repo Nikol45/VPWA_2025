@@ -108,27 +108,28 @@
           </div>
         </div>
 
-        <div
-          v-for="member in activeChannelMembers.slice(0, 3)"
-          :key="member.id"
-          class="member-item c-5 q-pa-sm q-mb-md row justify-between items-center"
-        >
-          <profile-block
-            class="fit"
-            :is-admin="isAdmin"
-            :is-private="isPrivate"
-            :user="member"
-            :buttons="getButtonsForMember(member)"
-            @action="(a) => handleMemberAction(a, member)"
-          />
-        </div>
+          <div
+              v-for="member in sortedMembers.slice(0, 3)"
+              :key="member.id"
+              class="member-item c-5 q-pa-sm q-mb-md row justify-between items-center"
+          >
+              <profile-block
+                  class="fit"
+                  :is-admin="isAdmin"
+                  :is-private="isPrivate"
+                  :user="member"
+                  :buttons="getButtonsForMember(member)"
+                  @action="(a) => handleMemberAction(a, member)"
+              />
+          </div>
 
-        <p
-          v-if="activeChannel && remainingMembersCount > 0"
-          class="text-caption text-c-1 text-weight-bold"
-        >
-          And {{ remainingMembersCount }} others...
-        </p>
+          <p
+              v-if="sortedMembers.length > 3"
+              class="text-caption text-c-1 text-weight-bold"
+          >
+              And {{ remainingMembersCount }} others...
+          </p>
+
       </div>
     </div>
 
@@ -156,7 +157,6 @@
       v-model="showInvitePopup"
       :invite-code="inviteCode"
       @invite="onInviteNickname"
-      @copy="onCopyInviteCode"
     />
   </q-page>
 </template>
@@ -225,44 +225,58 @@ export default defineComponent({
     return { authStore, channelsStore }
   },
 
-  computed: {
-    activeChannel(): Channel | null {
-      const idParam = this.$route.params.id as string | undefined
-      if (!idParam) return null
-      const id = Number(idParam)
-      if (!Number.isFinite(id)) return null
-      return this.channelsStore.items.find((c) => c.id === id) ?? null
-    },
+    computed: {
+        activeChannel(): Channel | null {
+            const idParam = this.$route.params.id as string | undefined
+            if (!idParam) return null
+            const id = Number(idParam)
+            if (!Number.isFinite(id)) return null
+            return this.channelsStore.items.find((c) => c.id === id) ?? null
+        },
 
-    activeChannelIcon(): string {
-      if (!this.activeChannel) return '/avatars/channels/default.png'
-      
-      const path = this.activeChannel.iconUrl || '/avatars/channels/default.png'
+        activeChannelIcon(): string {
+            const ch = this.activeChannel
+            if (!ch) return '/avatars/channels/default.png'
 
-      if (!path.startsWith('http') && !path.startsWith('data:')) {
-         return `${import.meta.env.VITE_API_URL}${path}`
-      }
-      
-      return path
-    },
+            const path = ch.iconUrl || '/avatars/channels/default.png'
+            if (!path.startsWith('http') && !path.startsWith('data:')) {
+                return `${import.meta.env.VITE_API_URL}${path}`
+            }
+            return path
+        },
 
-    activeChannelMembers(): Member[] {
-      return this.members
-    },
+        activeChannelMembers(): Member[] {
+            return this.members
+        },
 
-    isAdmin(): boolean {
-      return !!this.activeChannel?.isAdmin
-    },
+        sortedMembers(): Member[] {
+            const members = this.members || []
+            if (!members.length) return []
 
-    isPrivate(): boolean {
-      return this.visibilityModel === 'Private'
-    },
+            const admin = members.find((m) => m.role === 'admin') || null
 
-    remainingMembersCount(): number {
-      if (!this.activeChannel) return 0
-      return Math.max(this.activeChannel.nMembers - 3, 0)
+            const firstName = (m: Member) =>
+                ((m.name ?? '').split(' ')[0] || '').toLowerCase()
+
+            const others = members
+                .filter((m) => m.role !== 'admin')
+                .sort((a, b) => firstName(a).localeCompare(firstName(b)))
+
+            return admin ? [admin, ...others] : others
+        },
+
+        isAdmin(): boolean {
+            return !!this.activeChannel?.isAdmin
+        },
+
+        isPrivate(): boolean {
+            return this.visibilityModel === 'Private'
+        },
+
+        remainingMembersCount(): number {
+            return Math.max(this.sortedMembers.length - 3, 0)
+        },
     },
-  },
 
   watch: {
     activeChannel: {
@@ -385,8 +399,8 @@ export default defineComponent({
       if (!channel) return
 
       try {
-        const result = await channelService.invite(channel.id, { nickname }) 
-        
+        const result = await channelService.invite(channel.id, { nickname })
+
         if (result.invited) {
             this.$q.notify({
               type: 'positive',
@@ -408,51 +422,24 @@ export default defineComponent({
 
         this.$q.notify({
           type: 'negative',
-          message: msg, 
+          message: msg,
           position: 'bottom-right',
           timeout: 2500,
       })
       }
     },
 
-    async onCopyInviteCode() {
-      if (!this.inviteCode) return
-
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(this.inviteCode)
-          this.$q.notify({
-            type: 'positive',
-            message: 'Invite code copied to clipboard',
-            position: 'bottom-right',
-            timeout: 1500,
-          })
-        }
-      } catch {
-        this.$q.notify({
-          type: 'warning',
-          message: 'Unable to copy invite code',
-          position: 'bottom-right',
-          timeout: 1500,
-        })
-      }
-    },
-
-    getButtonsForMember(member: Member) {
-          if (member.id === this.authStore.user?.id) return [] 
-
-          if (this.isPrivate) {
-              return this.isAdmin ? [{ icon: 'remove_circle_outline', action: 'remove' }] : []
-          }
-
-          if (this.isPrivate) {
-              return this.isAdmin ? [{ icon: 'remove_circle_outline', action: 'remove' }] : []
-          }
+      getButtonsForMember(member: Member) {
+          if (member.id === this.authStore.user?.id) return []
 
           if (member.role === 'admin') return []
-          
+
+          if (this.isPrivate) {
+              return this.isAdmin ? [{ icon: 'remove_circle_outline', action: 'remove' }] : []
+          }
+
           return [{ icon: 'remove_circle_outline', action: 'remove' }]
-    },
+      },
 
     async handleMemberAction(action: string, member: Member) {
           if (action !== 'remove') return
@@ -469,7 +456,7 @@ export default defineComponent({
                       await channelService.ban(id, member.nickname)
                   }
                   this.$q.notify({ type: 'positive', message: `Removed ${member.nickname}` })
-                  void this.fetchMembers(id) 
+                  void this.fetchMembers(id)
               } catch {
                   this.$q.notify({ type: 'negative', message: 'Failed to remove user' })
               }

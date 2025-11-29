@@ -38,7 +38,7 @@ const routes: RouteRecordRaw[] = [
     ]
   },
 
-  // fallback
+
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue')

@@ -1,27 +1,33 @@
 :root {
-  --l-1: #F1E1FF;
-  --l-2: #E2C1FF;
-  --l-3: #5C4B6B;
-  --l-4: #463855;
-  --l-5: #352A3D;
+    --l-1: #F1E1FF;
+    --l-2: #E2C1FF;
+    --l-3: #5C4B6B;
+    --l-4: #463855;
+    --l-5: #352A3D;
 
-  --b-1: #DEEEFF;
-  --b-2: #BAD0EF;
-  --b-3: #384E62;
-  --b-4: #1E2F3F;
-  --b-5: #182633;
+    --b-1: #DEEEFF;
+    --b-2: #BAD0EF;
+    --b-3: #384E62;
+    --b-4: #1E2F3F;
+    --b-5: #182633;
 
-  --p-1: #fff3f3;
-  --p-2: #b48a84;
-  --p-3: #7c5852;
-  --p-4: #442824;
-  --p-5: #2c1612;
+    --p-1: #fff3f3;
+    --p-2: #b48a84;
+    --p-3: #7c5852;
+    --p-4: #442824;
+    --p-5: #2c1612;
 
-  --g-1: #ecfff3;
-  --g-2: #BBF0CB;
-  --g-3: #437352;
-  --g-4: #1F4029;
-  --g-5: #183320;
+    --g-1: #ecfff3;
+    --g-2: #BBF0CB;
+    --g-3: #437352;
+    --g-4: #1F4029;
+    --g-5: #183320;
+
+    --r-1: #FFEFFE;
+    --r-2: #F7C8F2;
+    --r-3: #A46197;
+    --r-4: #6B3C60;
+    --r-5: #432440;
 
     /* DEFAULT */
     --c-1: var(--l-1);
@@ -32,60 +38,120 @@
 }
 
 :root[theme="lilac"] {
-  --c-1: var(--l-1);
-  --c-2: var(--l-2);
-  --c-3: var(--l-3);
-  --c-4: var(--l-4);
-  --c-5: var(--l-5);
+    --c-1: var(--l-1);
+    --c-2: var(--l-2);
+    --c-3: var(--l-3);
+    --c-4: var(--l-4);
+    --c-5: var(--l-5);
 }
 
 :root[theme="midnight"] {
-  --c-1: var(--b-1);
-  --c-2: var(--b-2);
-  --c-3: var(--b-3);
-  --c-4: var(--b-4);
-  --c-5: var(--b-5);
+    --c-1: var(--b-1);
+    --c-2: var(--b-2);
+    --c-3: var(--b-3);
+    --c-4: var(--b-4);
+    --c-5: var(--b-5);
 }
 
 :root[theme="chocolate"] {
-  --c-1: var(--p-1);
-  --c-2: var(--p-2);
-  --c-3: var(--p-3);
-  --c-4: var(--p-4);
-  --c-5: var(--p-5);
+    --c-1: var(--p-1);
+    --c-2: var(--p-2);
+    --c-3: var(--p-3);
+    --c-4: var(--p-4);
+    --c-5: var(--p-5);
 }
 
 :root[theme="forest"] {
-  --c-1: var(--g-1);
-  --c-2: var(--g-2);
-  --c-3: var(--g-3);
-  --c-4: var(--g-4);
-  --c-5: var(--g-5);
+    --c-1: var(--g-1);
+    --c-2: var(--g-2);
+    --c-3: var(--g-3);
+    --c-4: var(--g-4);
+    --c-5: var(--g-5);
 }
 
-.c-1 {  background-color: var(--c-1) !important;}
-.c-2 {  background-color: var(--c-2) !important;}
-.c-3 {  background-color: var(--c-3) !important;}
-.c-4 {  background-color: var(--c-4) !important;}
-.c-5 {   background-color: var(--c-5) !important; }
+:root[theme="rose"] {
+    --c-1: var(--r-1);
+    --c-2: var(--r-2);
+    --c-3: var(--r-3);
+    --c-4: var(--r-4);
+    --c-5: var(--r-5);
+}
 
-.text-c-1 {  color: var(--c-1) !important;}
-.text-c-2 {  color: var(--c-2) !important;}
-.text-c-3 {  color: var(--c-3) !important;}
-.text-c-4 {  color: var(--c-4) !important;}
-.text-c-5 {   color: var(--c-5) !important; }
+.c-1 {
+    background-color: var(--c-1) !important;
+}
 
-.negative { background-color: #D06155;}
+.c-2 {
+    background-color: var(--c-2) !important;
+}
 
-.q-chip { border-radius: 15px; }
-.q-field__control { border-radius: 15px !important; }
-.q-btn:not(.q-btn--round) { border-radius: 15px !important;}
-.q-input { border-radius: 15px !important;}
-.q-card { border-radius: 15px !important;}
-.q-select { border-radius: 15px; }
+.c-3 {
+    background-color: var(--c-3) !important;
+}
 
-.op-60 { opacity: .6; }
-.op-95 { opacity: .95; }
+.c-4 {
+    background-color: var(--c-4) !important;
+}
+
+.c-5 {
+    background-color: var(--c-5) !important;
+}
+
+.text-c-1 {
+    color: var(--c-1) !important;
+}
+
+.text-c-2 {
+    color: var(--c-2) !important;
+}
+
+.text-c-3 {
+    color: var(--c-3) !important;
+}
+
+.text-c-4 {
+    color: var(--c-4) !important;
+}
+
+.text-c-5 {
+    color: var(--c-5) !important;
+}
+
+.negative {
+    background-color: #D06155;
+}
+
+.q-chip {
+    border-radius: 15px;
+}
+
+.q-field__control {
+    border-radius: 15px !important;
+}
+
+.q-btn:not(.q-btn--round) {
+    border-radius: 15px !important;
+}
+
+.q-input {
+    border-radius: 15px !important;
+}
+
+.q-card {
+    border-radius: 15px !important;
+}
+
+.q-select {
+    border-radius: 15px;
+}
+
+.op-60 {
+    opacity: .6;
+}
+
+.op-95 {
+    opacity: .95;
+}
 
 .rad-15 {
     border-radius: 15px;
@@ -100,7 +166,7 @@
 }
 
 .close-btn {
-  z-index: 10;
+    z-index: 10;
 }
 
 /*popups*/

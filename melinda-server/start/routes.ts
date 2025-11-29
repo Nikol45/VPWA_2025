@@ -23,32 +23,36 @@ router
   .prefix('auth')
 
 router
-  .group(() => {
-    router.get('/', '#controllers/channels_controller.index')
-    router.post('/', '#controllers/channels_controller.store')
-    router.post('/join', '#controllers/channels_controller.joinByName')
+    .group(() => {
+        router.get('/', '#controllers/channels_controller.index')
+        router.post('/', '#controllers/channels_controller.store')
+        router.post('/join', '#controllers/channels_controller.joinByName')
+        router.post('/join/invite', '#controllers/channels_controller.joinByInvite').use(middleware.auth())
 
-    router.post('/:id/leave', '#controllers/channels_controller.leave')
-    router.delete('/:id', '#controllers/channels_controller.destroy')
+        router.get('/public/search', '#controllers/channels_controller.searchPublic')
 
-    router.post('/:id/invite', '#controllers/channels_controller.invite')
-    router.post('/:id/revoke', '#controllers/channels_controller.revoke')
-    router.post('/:id/decline', '#controllers/channels_controller.decline')
+        router.post('/:id/leave', '#controllers/channels_controller.leave')
+        router.delete('/:id', '#controllers/channels_controller.destroy')
 
-    router.post('/:id/kick', '#controllers/channels_controller.kick')
-    router.post('/:id/ban', '#controllers/channels_controller.ban')
-    router.post('/:id/unban', '#controllers/channels_controller.unban')
+        router.post('/:id/invite', '#controllers/channels_controller.invite')
+        router.post('/:id/revoke', '#controllers/channels_controller.revoke')
+        router.post('/:id/decline', '#controllers/channels_controller.decline')
 
-    router.get('/:id/members', '#controllers/channels_controller.members')
+        router.post('/:id/kick', '#controllers/channels_controller.kick')
+        router.post('/:id/ban', '#controllers/channels_controller.ban')
+        router.post('/:id/unban', '#controllers/channels_controller.unban')
 
-    router.get('/:id/messages', '#controllers/messages_controller.index')
-    router.post('/:id/messages', '#controllers/messages_controller.store')
+        router.get('/:id/members', '#controllers/channels_controller.members')
 
-    router.get('/:id/typing', '#controllers/typing_controller.index')
-    router.post('/:id/typing', '#controllers/typing_controller.store')
-  })
-  .prefix('channels')
-  .use(middleware.auth())
+        router.get('/:id/messages', '#controllers/messages_controller.index')
+        router.post('/:id/messages', '#controllers/messages_controller.store')
+
+        router.get('/:id/typing', '#controllers/typing_controller.index')
+        router.post('/:id/typing', '#controllers/typing_controller.store')
+    })
+    .prefix('channels')
+    .use(middleware.auth())
+
 
 router
   .group(() => {

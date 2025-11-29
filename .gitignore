@@ -1,3 +1,6 @@
 /quasar-project/node_modules
 /quasar-project/dist
 *.xml
+melinda-server/.editorconfig
+melinda-server/.editorconfig
+melinda-quasar/.editorconfig

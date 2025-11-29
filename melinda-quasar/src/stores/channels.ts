@@ -91,7 +91,7 @@ export const useChannelsStore = defineStore('channels', {
     async declineInvite(id: number) {
       try {
         await channelService.decline(id)
-        
+
         this.REMOVE_CHANNEL(id)
       } catch (error) {
         console.error('Failed to decline invite:', error)
@@ -118,7 +118,7 @@ export const useChannelsStore = defineStore('channels', {
         this.SET_STATUS('pending')
         this.SET_ERRORS([])
         const channel = await channelService.create(payload)
-        
+
         this.UPSERT_CHANNEL(channel)
         this.SET_STATUS('success')
         return channel
@@ -131,9 +131,9 @@ export const useChannelsStore = defineStore('channels', {
 
     async leaveChannel(id: number) {
         try {
-            await channelService.leave(id)
+            const res = await channelService.leave(id) as unknown as { success: boolean; deleted: boolean }
             this.REMOVE_CHANNEL(id)
-            return true
+            return res?.success ?? true
         } catch (error) {
             console.error(error)
             return false

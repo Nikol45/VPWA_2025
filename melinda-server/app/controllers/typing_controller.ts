@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import Channel from '#models/channel'
 import User from '#models/user'
 import { TypingStateValidator } from '#validators/typing_state'
+import app from '@adonisjs/core/services/app'
 
 interface TypingState {
   userId: number
@@ -12,7 +13,6 @@ interface TypingState {
 }
 
 type TypingKey = string
-
 const typingStates = new Map<TypingKey, TypingState>()
 
 function makeKey(channelId: number, userId: number): string {
@@ -43,14 +43,20 @@ export default class TypingController {
       .first()
 
     if (!isMember) {
-      return response.forbidden({
-        error: 'You are not a member of this channel',
-      })
+      return response.forbidden({ error: 'You are not a member of this channel' })
     }
 
     const payload = await request.validateUsing(TypingStateValidator)
-
     const key = makeKey(channel.id, user.id)
+
+    const io = await app.container.make('ws')
+
+    io.to(`channel:${channel.id}`).emit('typing:update', {
+      channelId: channel.id,
+      userId: user.id,
+      nickname: user.nickname,
+      text: payload.isTyping ? (payload.text || '') : ''
+    })
 
     if (!payload.isTyping) {
       typingStates.delete(key)

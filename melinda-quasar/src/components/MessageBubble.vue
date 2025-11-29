@@ -8,7 +8,7 @@
         </div>
 
         <div>
-            <div class="q-mt-md row items-center no-wrap">
+            <div class=" row items-center no-wrap">
               <div class="text-caption op-60 q-ml-sm">{{ user?.name }}</div>
               <div class="text-caption op-60 q-ml-xs"> - {{ message.time }}</div>
           </div>
@@ -80,11 +80,11 @@ export default defineComponent({
 
         avatarSrc(): string {
             const path = this.user?.avatar || '/avatars/users/default.png'
-            
+
             if (path.startsWith('http') || path.startsWith('data:')) {
                 return path
             }
-            
+
             return `${import.meta.env.VITE_API_URL}${path}`
         },
     },
